@@ -175,6 +175,23 @@ CREATE INDEX IF NOT EXISTS idx_videos_user_id    ON public.videos(user_id);
 CREATE INDEX IF NOT EXISTS idx_videos_created_at ON public.videos(created_at DESC);
 
 -- ============================================================
+-- PROJECTS TABLE
+-- Stores AI-generated project bundles (logos, brand kits, etc.)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.projects (
+    id           UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id      UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    title        TEXT NOT NULL,
+    project_type TEXT NOT NULL,
+    prompt       TEXT,
+    assets       JSONB DEFAULT '[]',
+    created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_user_id     ON public.projects(user_id);
+CREATE INDEX IF NOT EXISTS idx_projects_created_at  ON public.projects(created_at DESC);
+
+-- ============================================================
 -- DOWNLOADS TABLE
 -- Track image download events for analytics
 -- ============================================================
@@ -202,6 +219,7 @@ ALTER TABLE public.image_versions    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_logs     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.downloads         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.videos            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.projects          ENABLE ROW LEVEL SECURITY;
 
 -- PROFILES: Users can read/update their own profile
 CREATE POLICY "Users can view own profile"
@@ -287,6 +305,15 @@ CREATE POLICY "Users can manage own videos"
 
 CREATE POLICY "Service role full access videos"
     ON public.videos FOR ALL
+    USING (auth.role() = 'service_role');
+
+-- PROJECTS
+CREATE POLICY "Users can manage own projects"
+    ON public.projects FOR ALL
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Service role full access projects"
+    ON public.projects FOR ALL
     USING (auth.role() = 'service_role');
 
 -- ============================================================
