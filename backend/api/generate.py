@@ -212,7 +212,7 @@ def generate_image():
         profile = profiles[0] if profiles else {}
         credits = profile.get('ai_credits', 0)
         
-        credits_needed = num_images * 25
+        credits_needed = num_images * 15
         if credits < credits_needed:
             return jsonify({
                 'error': 'Insufficient credits',

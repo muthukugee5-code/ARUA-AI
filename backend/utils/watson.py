@@ -142,11 +142,11 @@ ASSISTANT_INTENTS = {
     },
     'generate': {
         'keywords': ['generate', 'create', 'make', 'produce', 'image'],
-        'response': 'To generate an image, go to the **Workspace** and type a detailed prompt. You can specify style, colors, and mood. Each generation costs 25 credits. Try something like: "a serene mountain landscape at sunset, cinematic lighting, photorealistic"'
+        'response': 'To generate an image, go to the **Workspace** and type a detailed prompt. You can specify style, colors, and mood. Each generation costs 15 credits. Try something like: "a serene mountain landscape at sunset, cinematic lighting, photorealistic"'
     },
     'credits': {
         'keywords': ['credit', 'coins', 'limit', 'cost', 'price', 'free'],
-        'response': 'You get **100 free credits** daily (refills every 24h). Each image generation costs **25 credits**. You can check your balance on the Dashboard.'
+        'response': 'You get **100 free credits** daily (refills every 24h). Each image generation costs **15 credits**. You can check your balance on the Dashboard.'
     },
     'editor': {
         'keywords': ['edit', 'editor', 'filter', 'adjust', 'crop', 'resize'],
@@ -154,7 +154,7 @@ ASSISTANT_INTENTS = {
     },
     'project': {
         'keywords': ['project', 'brand', 'generator', 'assets'],
-        'response': 'The **Project Generator** creates 5 brand assets from one prompt! Try types like: cafe, restaurant, startup, fashion, or app. Each project costs 125 credits (5 × 25 credits).'
+        'response': 'The **Project Generator** creates 5 brand assets from one prompt! Try types like: cafe, restaurant, startup, fashion, or app. Each project costs 75 credits (5 × 15 credits).'
     },
     'agents': {
         'keywords': ['agent', 'multi', 'studio', 'collaborate'],

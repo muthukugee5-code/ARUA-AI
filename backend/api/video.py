@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 video_bp = Blueprint('video', __name__)
 
 # Credits per scene (each scene is a generated image)
-CREDITS_PER_SCENE = 25
+CREDITS_PER_SCENE = 15
 MAX_SCENES = 8
 MAX_DURATION = 10  # seconds per scene
 

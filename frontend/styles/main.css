@@ -750,6 +750,25 @@ input, textarea, select { font-family: var(--font-body); }
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  transition: margin-left var(--transition-base);
+}
+
+/* Collapsed sidebar (hamburger toggle on any screen size) */
+body.sidebar-collapsed .sidebar {
+  transform: translateX(-100%);
+}
+
+body.sidebar-collapsed .main-content {
+  margin-left: 0;
+}
+
+@media (min-width: 769px) {
+  body.sidebar-collapsed .sidebar {
+    transform: translateX(-100%);
+  }
+  body.sidebar-collapsed .main-content {
+    margin-left: 0;
+  }
 }
 
 /* Topbar */
