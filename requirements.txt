@@ -1,0 +1,32 @@
+# ARUA AI - Python Backend Dependencies
+# Install with: pip install -r requirements.txt
+
+# ---- Core Framework ----
+Flask==3.0.0
+flask-cors==4.0.0
+
+# ---- Environment & Config ----
+python-dotenv==1.0.0
+
+# ---- HTTP Requests ----
+requests==2.31.0
+
+# ---- Image Processing ----
+Pillow==10.1.0
+
+# ---- WSGI Server (Production) ----
+gunicorn==21.2.0
+
+# ---- Security ----
+# PyJWT is not needed - Supabase handles JWT verification via REST API
+cryptography==41.0.7
+
+# ---- Optional: Enhanced BG Removal ----
+# rembg==2.0.52  # Uncomment for production-quality background removal
+# torch            # Required by rembg - large install
+
+# ---- Google Gemini (Smart Agent Mode) ----
+# (uses requests directly - no extra SDK needed)
+
+# ---- Development ----
+# flask-debugtoolbar==0.14.1

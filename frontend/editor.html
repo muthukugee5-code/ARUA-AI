@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Editor – ARUA AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .editor-layout { display: grid; grid-template-columns: 280px 1fr 260px; height: calc(100vh - 64px); overflow: hidden; }
+    .editor-panel { background: rgba(8,8,16,0.8); border-right: 1px solid var(--border-subtle); overflow-y: auto; padding: 16px; }
+    .editor-canvas-area { display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); padding: 24px; position: relative; overflow: hidden; }
+    .editor-tools-panel { border-left: 1px solid var(--border-subtle); overflow-y: auto; padding: 16px; }
+    .canvas-wrapper { position: relative; max-width: 100%; max-height: 100%; }
+    .canvas-wrapper img { max-width: 100%; max-height: calc(100vh - 160px); object-fit: contain; border-radius: 12px; display: block; transition: all 0.3s; }
+    .editor-tool-btn {
+      width: 40px; height: 40px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;
+      background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary); cursor: pointer; font-size: 1rem; transition: all 0.2s;
+    }
+    .editor-tool-btn:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+    .editor-tool-btn.active { background: rgba(124,92,216,0.2); border-color: var(--accent-primary); color: var(--text-primary); }
+    .control-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .control-row label { font-size: 0.78rem; color: var(--text-muted); width: 80px; flex-shrink: 0; }
+    .control-row .form-range { flex: 1; }
+    .control-row span { font-size: 0.8rem; font-weight: 600; color: var(--accent-primary); width: 32px; text-align: right; }
+    .filter-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .filter-btn { padding: 10px 8px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); background: var(--bg-card); cursor: pointer; font-size: 0.78rem; font-weight: 500; color: var(--text-secondary); transition: all 0.2s; text-align: center; }
+    .filter-btn:hover { border-color: var(--border-accent); color: var(--text-primary); }
+    .filter-btn.active { border-color: var(--accent-primary); background: rgba(124,92,216,0.15); color: var(--text-primary); }
+    .editor-section { margin-bottom: 20px; }
+    .editor-section-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+    .no-image-state { text-align: center; }
+    .no-image-state .btn { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon"><i class="fas fa-sparkles"></i></div>
+          <span class="sidebar-logo-text">ARUA<span> AI</span></span>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <a href="dashboard.html" class="nav-item"><i class="fas fa-home nav-icon"></i> Dashboard</a>
+          <a href="workspace.html" class="nav-item"><i class="fas fa-magic nav-icon"></i> AI Workspace</a>
+          <a href="project-generator.html" class="nav-item"><i class="fas fa-layer-group nav-icon"></i> Project Generator</a>
+          <a href="agents-studio.html" class="nav-item"><i class="fas fa-robot nav-icon"></i> AI Agents</a>
+          <a href="gallery.html" class="nav-item"><i class="fas fa-images nav-icon"></i> My Gallery</a>
+          <a href="editor.html" class="nav-item active"><i class="fas fa-edit nav-icon"></i> Image Editor</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user" onclick="window.location.href='profile.html'">
+          <div class="user-avatar" id="sidebar-user-avatar">U</div>
+          <div class="user-info"><div class="user-name" id="sidebar-user-name">Loading...</div></div>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="event.stopPropagation();Auth.logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content" style="overflow:hidden">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-ghost btn-icon" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+          <div class="topbar-title">Image Editor</div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-sm" id="undo-btn" onclick="undoEdit()" disabled title="Undo (Ctrl+Z)"><i class="fas fa-rotate-left"></i></button>
+          <button class="btn btn-ghost btn-sm" id="redo-btn" onclick="redoEdit()" disabled title="Redo (Ctrl+Y)"><i class="fas fa-rotate-right"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="resetEdits()"><i class="fas fa-undo"></i> Reset</button>
+          <button class="btn btn-glass btn-sm" onclick="saveVersion()"><i class="fas fa-history"></i> Save Version</button>
+          <button class="btn btn-primary btn-sm" id="download-btn" onclick="downloadResult()"><i class="fas fa-download"></i> Download</button>
+          <button class="btn btn-ghost btn-icon" data-action="toggle-theme"><i class="fas fa-moon" data-theme-icon></i></button>
+        </div>
+      </div>
+
+      <div class="editor-layout">
+        <!-- Tools Panel -->
+        <div class="editor-panel">
+          <!-- Transform -->
+          <div class="editor-section">
+            <div class="editor-section-title"><i class="fas fa-arrows-rotate"></i> Transform</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="editor-tool-btn" onclick="applyTransform('rotate',-90)" title="Rotate Left"><i class="fas fa-rotate-left"></i></button>
+              <button class="editor-tool-btn" onclick="applyTransform('rotate',90)" title="Rotate Right"><i class="fas fa-rotate-right"></i></button>
+              <button class="editor-tool-btn" onclick="applyTransform('flip','horizontal')" title="Flip H"><i class="fas fa-arrows-left-right"></i></button>
+              <button class="editor-tool-btn" onclick="applyTransform('flip','vertical')" title="Flip V"><i class="fas fa-arrows-up-down"></i></button>
+            </div>
+          </div>
+
+          <!-- Adjustments -->
+          <div class="editor-section">
+            <div class="editor-section-title"><i class="fas fa-sliders"></i> Adjustments</div>
+            <div class="control-row">
+              <label>Brightness</label>
+              <input type="range" class="form-range" id="brightness" min="0.1" max="2.5" step="0.05" value="1" oninput="updatePreview('brightness',this.value);this.nextElementSibling.textContent=Math.round(this.value*100)+'%'">
+              <span>100%</span>
+            </div>
+            <div class="control-row">
+              <label>Contrast</label>
+              <input type="range" class="form-range" id="contrast" min="0.1" max="2.5" step="0.05" value="1" oninput="updatePreview('contrast',this.value);this.nextElementSibling.textContent=Math.round(this.value*100)+'%'">
+              <span>100%</span>
+            </div>
+            <div class="control-row">
+              <label>Saturation</label>
+              <input type="range" class="form-range" id="saturation" min="0" max="3" step="0.05" value="1" oninput="updatePreview('saturation',this.value);this.nextElementSibling.textContent=Math.round(this.value*100)+'%'">
+              <span>100%</span>
+            </div>
+            <div class="control-row">
+              <label>Blur</label>
+              <input type="range" class="form-range" id="blur" min="0" max="10" step="0.5" value="0" oninput="updatePreview('blur',this.value);this.nextElementSibling.textContent=this.value">
+              <span>0</span>
+            </div>
+            <div class="control-row">
+              <label>Sharpen</label>
+              <input type="range" class="form-range" id="sharpen" min="0" max="5" step="0.5" value="0" oninput="updatePreview('sharpen',this.value);this.nextElementSibling.textContent=this.value">
+              <span>0</span>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="editor-section">
+            <div class="editor-section-title"><i class="fas fa-palette"></i> Filters</div>
+              <div class="filter-list">
+                <button class="filter-btn active" data-filter="none" onclick="applyFilter(this,'none')">None</button>
+                <button class="filter-btn" data-filter="grayscale" onclick="applyFilter(this,'grayscale')">Grayscale</button>
+                <button class="filter-btn" data-filter="vintage" onclick="applyFilter(this,'vintage')">Vintage</button>
+                <button class="filter-btn" data-filter="hdr" onclick="applyFilter(this,'hdr')">HDR</button>
+                <button class="filter-btn" data-filter="neon" onclick="applyFilter(this,'neon')">Neon</button>
+                <button class="filter-btn" data-filter="cartoon" onclick="applyFilter(this,'cartoon')">Cartoon</button>
+                <button class="filter-btn" data-filter="sketch" onclick="applyFilter(this,'sketch')">Sketch</button>
+                <button class="filter-btn" data-filter="sepia" onclick="applyFilter(this,'sepia')">Sepia</button>
+              </div>
+          </div>
+
+          <!-- AI Tools -->
+          <div class="editor-section">
+            <div class="editor-section-title"><i class="fas fa-magic"></i> AI Tools</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-glass w-full btn-sm" onclick="aiUpscale()">
+                <i class="fas fa-up-right-and-down-left-from-center"></i> AI Upscale 2x
+              </button>
+              <button class="btn btn-glass w-full btn-sm" onclick="removeBackground()">
+                <i class="fas fa-scissors"></i> Remove Background
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="editor-canvas-area" id="canvas-area">
+          <div id="no-image-state" class="no-image-state">
+            <div style="font-size:4rem;margin-bottom:16px">🖼️</div>
+            <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:8px">No Image Loaded</h3>
+            <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px">Open an image from your gallery or upload one to start editing.</p>
+            <input type="file" id="file-upload" accept="image/*" style="display:none" onchange="loadUploadedFile(event)">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+              <button class="btn btn-primary" onclick="document.getElementById('file-upload').click()">
+                <i class="fas fa-upload"></i> Upload Image
+              </button>
+              <a href="gallery.html" class="btn btn-glass"><i class="fas fa-images"></i> From Gallery</a>
+            </div>
+          </div>
+          <div id="image-area" class="hidden">
+            <div class="canvas-wrapper">
+              <img id="editor-image" src="" alt="Editing">
+            </div>
+          </div>
+          <div id="processing-overlay" class="hidden" style="position:absolute;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;border-radius:12px;z-index:10">
+            <div class="spinner spinner-lg"></div>
+            <p id="processing-text" style="color:white;font-weight:600">Processing...</p>
+          </div>
+        </div>
+
+        <!-- Properties Panel -->
+        <div class="editor-tools-panel">
+          <div class="editor-section">
+            <div class="editor-section-title"><i class="fas fa-info-circle"></i> Image Info</div>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:0.82rem;color:var(--text-muted)" id="image-info">
+              <div>No image loaded</div>
+            </div>
+          </div>
+
+          <div class="editor-section">
+            <div class="editor-section-title"><i class="fas fa-history"></i> Version History</div>
+            <div id="version-list" style="display:flex;flex-direction:column;gap:6px;font-size:0.82rem">
+              <div style="color:var(--text-muted)">No versions saved</div>
+            </div>
+          </div>
+
+          <div class="editor-section">
+            <div class="editor-section-title"><i class="fas fa-expand"></i> Resize</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+              <input type="number" id="resize-w" class="form-input" placeholder="Width" style="font-size:0.82rem;padding:7px 10px">
+              <span style="color:var(--text-muted)">×</span>
+              <input type="number" id="resize-h" class="form-input" placeholder="Height" style="font-size:0.82rem;padding:7px 10px">
+            </div>
+            <button class="btn btn-glass w-full btn-sm" onclick="applyResize()">Apply Resize</button>
+          </div>
+
+          <div class="editor-section">
+            <div class="editor-section-title"><i class="fas fa-download"></i> Export</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-primary w-full btn-sm" onclick="downloadResult('png')"><i class="fas fa-file-image"></i> Export PNG</button>
+              <button class="btn btn-glass w-full btn-sm" onclick="downloadResult('jpeg')"><i class="fas fa-file-image"></i> Export JPEG</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+  <script src="scripts/core.js"></script>
+  <script>
+    if (!Auth.isLoggedIn()) window.location.href = 'login.html';
+
+    let currentImageUrl = null;
+    let currentImageId = null;
+    let editedImageData = null;
+    let currentEdits = {};
+    let applyTimeout;
+    let undoStack = [];
+    let redoStack = [];
+    let ignoreHistoryPush = false;
+
+    // Load from URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const imageUrl = urlParams.get('image');
+    const imageId = urlParams.get('id');
+
+    if (imageUrl) {
+      loadImage(decodeURIComponent(imageUrl), imageId);
+    }
+
+    function loadImage(url, id) {
+      currentImageUrl = url;
+      currentImageId = id;
+      currentEdits = {};
+      editedImageData = null;
+
+      const img = document.getElementById('editor-image');
+      img.src = url;
+      img.onload = () => {
+        DOM.hide('no-image-state');
+        DOM.show('image-area');
+        document.getElementById('image-info').innerHTML = `
+          <div>📐 ${img.naturalWidth} × ${img.naturalHeight}px</div>
+          <div>🔗 <span style="word-break:break-all;font-size:0.75rem">${url.substring(0,60)}...</span></div>
+        `;
+        document.getElementById('resize-w').value = img.naturalWidth;
+        document.getElementById('resize-h').value = img.naturalHeight;
+        pushHistory();
+      };
+    }
+
+    function loadUploadedFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => loadImage(e.target.result, null);
+      reader.readAsDataURL(file);
+    }
+
+    function updatePreview(type, value) {
+      const img = document.getElementById('editor-image');
+      currentEdits[type] = parseFloat(value);
+
+      // Apply CSS filters for instant preview
+      const brightness = document.getElementById('brightness').value;
+      const contrast = document.getElementById('contrast').value;
+      const saturation = document.getElementById('saturation').value;
+      const blur = document.getElementById('blur').value;
+
+      img.style.filter = `
+        brightness(${brightness})
+        contrast(${contrast})
+        saturate(${saturation})
+        blur(${blur}px)
+      `;
+
+      // Debounce backend processing
+      clearTimeout(applyTimeout);
+      applyTimeout = setTimeout(() => applyEditsBackend(), 1500);
+    }
+
+    function applyFilter(btn, filter) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const img = document.getElementById('editor-image');
+      const filterMap = {
+        none: '',
+        grayscale: 'grayscale(1)',
+        vintage: 'sepia(0.5) contrast(1.1) brightness(0.9)',
+        hdr: 'contrast(1.4) saturate(1.3)',
+        neon: 'brightness(1.3) saturate(2) contrast(1.1)',
+        cartoon: 'saturate(1.5) contrast(1.3)',
+        sketch: 'grayscale(1) contrast(2)',
+        sepia: 'sepia(1)'
+      };
+
+      img.style.filter = (filterMap[filter] || '') + ` brightness(${document.getElementById('brightness').value}) contrast(${document.getElementById('contrast').value})`;
+      currentEdits.filter = filter === 'none' ? null : filter;
+    }
+
+    function applyTransform(type, value) {
+      const img = document.getElementById('editor-image');
+      if (type === 'rotate') {
+        const current = parseInt(img.style.getPropertyValue('--rotate') || 0);
+        const newRot = current + value;
+        img.style.setProperty('--rotate', newRot);
+        img.style.transform = `rotate(${newRot}deg)`;
+      } else if (type === 'flip') {
+        if (value === 'horizontal') {
+          const scaleX = img.dataset.flipX === 'true' ? 1 : -1;
+          img.dataset.flipX = scaleX === -1 ? 'true' : 'false';
+          img.style.transform = (img.style.transform || '') + ` scaleX(${scaleX})`;
+        }
+      }
+    }
+
+    async function applyEditsBackend() {
+      if (!currentImageUrl || Object.keys(currentEdits).length === 0) return;
+
+      const relevantEdits = {};
+      for (const [k, v] of Object.entries(currentEdits)) {
+        if (k !== 'brightness' || v !== 1) relevantEdits[k] = v;
+        if (k !== 'contrast' || v !== 1) relevantEdits[k] = v;
+      }
+
+      // Only apply non-trivial edits to backend
+      try {
+        const result = await API.post('/editor/edit', {
+          image_url: currentImageUrl,
+          edits: currentEdits,
+          image_id: currentImageId,
+          save_version: false
+        });
+
+        if (result?.edited_image) {
+          editedImageData = result.edited_image;
+          document.getElementById('editor-image').src = result.edited_image;
+          Toast.info('Preview updated', 1500);
+          pushHistory();
+        }
+      } catch {}
+    }
+
+    async function aiUpscale() {
+      if (!currentImageUrl) { Toast.warning('Load an image first'); return; }
+      showProcessing('AI Upscaling... this may take a moment');
+
+      try {
+        const result = await API.post('/editor/upscale', { image_url: currentImageUrl, scale: 2 });
+        if (result?.result) {
+          editedImageData = result.result;
+          document.getElementById('editor-image').src = result.result;
+          Toast.success(`Upscaled to ${result.new_dimensions.width}×${result.new_dimensions.height}!`);
+          pushHistory();
+        }
+      } catch (err) {
+        Toast.error('Upscale failed: ' + err.message);
+      } finally {
+        hideProcessing();
+      }
+    }
+
+    async function removeBackground() {
+      if (!currentImageUrl) { Toast.warning('Load an image first'); return; }
+      showProcessing('Removing background...');
+
+      try {
+        const result = await API.post('/editor/remove-background', { image_url: currentImageUrl });
+        if (result?.result) {
+          editedImageData = result.result;
+          document.getElementById('editor-image').src = result.result;
+          document.getElementById('canvas-area').style.backgroundImage = 'repeating-conic-gradient(#333 0% 25%, transparent 0% 50%) 0 0/20px 20px';
+          Toast.success('Background removed!');
+          pushHistory();
+        }
+      } catch (err) {
+        Toast.error('Failed: ' + err.message);
+      } finally {
+        hideProcessing();
+      }
+    }
+
+    function applyResize() {
+      const w = parseInt(document.getElementById('resize-w').value);
+      const h = parseInt(document.getElementById('resize-h').value);
+      if (!w || !h) { Toast.warning('Enter valid dimensions'); return; }
+      if (!currentImageUrl) { Toast.warning('No image loaded'); return; }
+      currentEdits.resize = { width: w, height: h };
+      applyEditsBackend();
+      Toast.info(`Resize to ${w}×${h}px queued`);
+    }
+
+    function resetEdits() {
+      pushHistory();
+      currentEdits = {};
+      const img = document.getElementById('editor-image');
+      img.style.filter = '';
+      img.style.transform = '';
+      document.getElementById('brightness').value = 1;
+      document.getElementById('contrast').value = 1;
+      document.getElementById('saturation').value = 1;
+      document.getElementById('blur').value = 0;
+      document.getElementById('sharpen').value = 0;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      editedImageData = null;
+      Toast.info('Edits reset');
+    }
+
+    async function saveVersion() {
+      if (!currentImageUrl) { Toast.warning('No image to save'); return; }
+      try {
+        await API.post('/editor/edit', {
+          image_url: currentImageUrl,
+          edits: currentEdits,
+          image_id: currentImageId,
+          save_version: true
+        });
+        Toast.success('Version saved!');
+        const vl = document.getElementById('version-list');
+        const item = document.createElement('div');
+        item.innerHTML = `<div class="glass" style="padding:8px;border-radius:8px">Version ${new Date().toLocaleTimeString()}</div>`;
+        vl.prepend(item);
+      } catch (err) {
+        Toast.error('Failed to save version');
+      }
+    }
+
+    function pushHistory() {
+      const img = document.getElementById('editor-image');
+      if (ignoreHistoryPush) return;
+      undoStack.push({
+        src: img.src,
+        edits: JSON.parse(JSON.stringify(currentEdits)),
+        filter: currentEdits.filter || null,
+        editedData: editedImageData
+      });
+      redoStack = [];
+      updateUndoButtons();
+    }
+
+    function restoreState(state) {
+      const img = document.getElementById('editor-image');
+      ignoreHistoryPush = true;
+      currentEdits = state.edits || {};
+      editedImageData = state.editedData;
+      img.src = state.src;
+      img.style.filter = '';
+      img.style.transform = '';
+      if (state.filter) {
+        currentEdits.filter = state.filter;
+        document.querySelectorAll('.filter-btn').forEach(b => {
+          b.classList.toggle('active', b.dataset.filter === state.filter);
+        });
+      } else {
+        currentEdits.filter = null;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        const noneBtn = document.querySelector('.filter-btn[data-filter="none"]');
+        if (noneBtn) noneBtn.classList.add('active');
+      }
+      ignoreHistoryPush = false;
+      updateUndoButtons();
+    }
+
+    function undoEdit() {
+      if (undoStack.length === 0) return;
+      const img = document.getElementById('editor-image');
+      redoStack.push({
+        src: img.src,
+        edits: JSON.parse(JSON.stringify(currentEdits)),
+        filter: currentEdits.filter || null,
+        editedData: editedImageData
+      });
+      restoreState(undoStack.pop());
+    }
+
+    function redoEdit() {
+      if (redoStack.length === 0) return;
+      const img = document.getElementById('editor-image');
+      undoStack.push({
+        src: img.src,
+        edits: JSON.parse(JSON.stringify(currentEdits)),
+        filter: currentEdits.filter || null,
+        editedData: editedImageData
+      });
+      restoreState(redoStack.pop());
+    }
+
+    function updateUndoButtons() {
+      document.getElementById('undo-btn').disabled = undoStack.length === 0;
+      document.getElementById('redo-btn').disabled = redoStack.length === 0;
+    }
+
+    function downloadResult(format = 'png') {
+      const src = editedImageData || document.getElementById('editor-image').src;
+      if (!src || src === window.location.href) { Toast.warning('No image to download'); return; }
+      const a = document.createElement('a');
+      a.href = src;
+      a.download = `arua-edited-${Date.now()}.${format}`;
+      a.click();
+      Toast.success('Download started!');
+    }
+
+    function showProcessing(text) {
+      const overlay = document.getElementById('processing-overlay');
+      document.getElementById('processing-text').textContent = text;
+      overlay.classList.remove('hidden');
+      overlay.style.display = 'flex';
+    }
+
+    function hideProcessing() {
+      const overlay = document.getElementById('processing-overlay');
+      overlay.classList.add('hidden');
+      overlay.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initSidebarUser();
+      setActiveNav();
+      initMobileSidebar();
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) redoEdit();
+          else undoEdit();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+          e.preventDefault();
+          redoEdit();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

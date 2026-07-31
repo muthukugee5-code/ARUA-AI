@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery – ARUA AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .filter-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      padding: 16px; background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); margin-bottom: 20px;
+    }
+    .filter-select { padding: 7px 12px; border-radius: var(--radius-md); background: var(--bg-secondary); border: 1px solid var(--border-subtle); color: var(--text-primary); font-size: 0.85rem; cursor: pointer; }
+    .filter-select option { background: #1a1a2e; color: var(--text-primary); }
+    .search-wrapper { position: relative; flex: 1; min-width: 200px; }
+    .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-hint); font-size: 0.85rem; }
+    .search-input { padding-left: 36px; }
+    .grid-toggle { display: flex; gap: 4px; background: var(--bg-secondary); padding: 4px; border-radius: var(--radius-md); }
+    .grid-toggle-btn { padding: 6px 10px; border-radius: 6px; cursor: pointer; color: var(--text-muted); font-size: 0.85rem; transition: all 0.2s; }
+    .grid-toggle-btn.active { background: var(--bg-glass-strong); color: var(--text-primary); }
+    .image-grid.list-view { grid-template-columns: 1fr; gap: 8px; }
+    .image-grid.list-view .image-card { aspect-ratio: unset; display: flex; align-items: center; gap: 16px; height: 80px; padding: 12px; }
+    .image-grid.list-view .image-card img { width: 56px; height: 56px; border-radius: 10px; flex-shrink: 0; object-fit: cover; }
+    .image-grid.list-view .image-card-overlay, .image-grid.list-view .image-card-actions { display: none; }
+    .load-more-btn { display: block; margin: 32px auto 0; }
+    .image-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.92); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.3s; }
+    .image-lightbox.active { opacity: 1; visibility: visible; }
+    .lightbox-content { display: flex; gap: 24px; max-width: 1100px; width: 100%; max-height: 90vh; }
+    .lightbox-img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .lightbox-img-wrap img { max-width: 100%; max-height: 80vh; border-radius: 16px; object-fit: contain; }
+    .lightbox-meta { width: 280px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 24px; overflow-y: auto; flex-shrink: 0; }
+    @media (max-width:768px) { .lightbox-content { flex-direction: column; } .lightbox-meta { width: 100%; } }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg"></div>
+  <div class="mouse-glow"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon"><i class="fas fa-sparkles"></i></div>
+          <span class="sidebar-logo-text">ARUA<span> AI</span></span>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <a href="dashboard.html" class="nav-item"><i class="fas fa-home nav-icon"></i> Dashboard</a>
+          <a href="workspace.html" class="nav-item"><i class="fas fa-magic nav-icon"></i> AI Workspace</a>
+          <a href="project-generator.html" class="nav-item"><i class="fas fa-layer-group nav-icon"></i> Project Generator</a>
+          <a href="agents-studio.html" class="nav-item"><i class="fas fa-robot nav-icon"></i> AI Agents</a>
+          <a href="gallery.html" class="nav-item active"><i class="fas fa-images nav-icon"></i> My Gallery</a>
+          <a href="collections.html" class="nav-item"><i class="fas fa-folder nav-icon"></i> Collections</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">AI Tools</div>
+          <a href="workspace.html?type=3d" class="nav-item"><i class="fas fa-cube nav-icon"></i> 3D Studio</a>
+          <a href="workspace.html?type=anime" class="nav-item"><i class="fas fa-star nav-icon"></i> Anime Studio</a>
+          <a href="workspace.html?type=ui" class="nav-item"><i class="fas fa-desktop nav-icon"></i> UI Designer</a>
+          <a href="editor.html" class="nav-item"><i class="fas fa-edit nav-icon"></i> Image Editor</a>
+        </div>
+        <div class="nav-section">
+          <a href="profile.html" class="nav-item"><i class="fas fa-user nav-icon"></i> Profile</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user" onclick="window.location.href='profile.html'">
+          <div class="user-avatar" id="sidebar-user-avatar">U</div>
+          <div class="user-info"><div class="user-name" id="sidebar-user-name">Loading...</div><div class="user-role">Creator</div></div>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="event.stopPropagation();Auth.logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-ghost btn-icon" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+          <div>
+            <div class="topbar-title">My Gallery</div>
+            <div class="topbar-subtitle" id="gallery-count">Loading images...</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-icon" data-action="toggle-theme"><i class="fas fa-moon" data-theme-icon></i></button>
+          <a href="workspace.html" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Generate</a>
+        </div>
+      </div>
+
+      <div class="page-content">
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <div class="search-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-input" class="form-input search-input" placeholder="Search prompts..." oninput="debounceSearch()">
+          </div>
+          <select class="filter-select" id="filter-style" onchange="loadGallery(1)">
+            <option value="">All Styles</option>
+            <option value="realistic">Realistic</option>
+            <option value="anime">Anime</option>
+            <option value="digital_painting">Digital Art</option>
+            <option value="cinematic">Cinematic</option>
+            <option value="cyberpunk">Cyberpunk</option>
+            <option value="minimal">Minimal</option>
+          </select>
+          <select class="filter-select" id="filter-sort" onchange="loadGallery(1)">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="popular">Most Downloaded</option>
+          </select>
+          <div class="tabs" style="padding:2px">
+            <button class="tab-btn active" onclick="filterFavorites(false, this)">All</button>
+            <button class="tab-btn" onclick="filterFavorites(true, this)">❤️ Favorites</button>
+          </div>
+          <div class="grid-toggle">
+            <button class="grid-toggle-btn active" onclick="setGridView('grid',this)" title="Grid"><i class="fas fa-th"></i></button>
+            <button class="grid-toggle-btn" onclick="setGridView('list',this)" title="List"><i class="fas fa-list"></i></button>
+          </div>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div class="image-grid" id="gallery-grid">
+          <!-- Skeleton -->
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="gallery-empty" class="hidden" style="text-align:center;padding:60px 20px;color:var(--text-muted)">
+          <div style="font-size:3rem;margin-bottom:16px">🖼️</div>
+          <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:8px">No images found</h3>
+          <p>Start generating AI images to fill your gallery!</p>
+          <a href="workspace.html" class="btn btn-primary" style="margin-top:16px"><i class="fas fa-magic"></i> Generate First Image</a>
+        </div>
+
+        <button id="load-more-btn" class="btn btn-glass load-more-btn hidden" onclick="loadMore()">
+          <i class="fas fa-chevron-down"></i> Load More
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="image-lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <div class="lightbox-img-wrap">
+        <img id="lightbox-img" src="" alt="Full size image">
+      </div>
+      <div class="lightbox-meta">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="font-size:1rem;font-weight:700">Image Details</h3>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="lightbox-prompt" style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;padding:12px;background:var(--bg-card);border-radius:10px"></div>
+        <div id="lightbox-meta-info" style="display:flex;flex-direction:column;gap:8px;font-size:0.82rem;color:var(--text-muted);margin-bottom:16px"></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary w-full" onclick="downloadCurrentImage()"><i class="fas fa-download"></i> Download</button>
+          <button class="btn btn-glass w-full" id="lightbox-favorite-btn" onclick="toggleLightboxFavorite()"><i class="fas fa-heart"></i> Favorite</button>
+          <button class="btn btn-glass w-full" onclick="editCurrentImage()"><i class="fas fa-edit"></i> Edit Image</button>
+          <button class="btn btn-danger w-full" onclick="deleteCurrentImage()"><i class="fas fa-trash"></i> Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+  <script src="scripts/core.js"></script>
+  <script>
+    if (!Auth.isLoggedIn()) window.location.href = 'login.html';
+
+    let currentPage = 1;
+    let totalPages = 1;
+    let showFavorites = false;
+    let currentImage = null;
+    let searchTimeout;
+
+    async function loadGallery(page = 1) {
+      currentPage = page;
+      const grid = document.getElementById('gallery-grid');
+
+      if (page === 1) {
+        grid.innerHTML = Array(6).fill('<div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>').join('');
+      }
+
+      const params = {
+        page,
+        per_page: 20,
+        style: document.getElementById('filter-style').value,
+        sort: document.getElementById('filter-sort').value,
+        favorites: showFavorites,
+        search: document.getElementById('search-input').value.trim()
+      };
+
+      try {
+        const data = await API.get('/gallery', params);
+
+        if (!data) return;
+
+        totalPages = data.pagination?.pages || 1;
+        const images = data.images || [];
+
+        document.getElementById('gallery-count').textContent = `${data.pagination?.total || 0} images`;
+
+        if (!images.length) {
+          grid.innerHTML = '';
+          DOM.show('gallery-empty');
+          DOM.hide('load-more-btn');
+          return;
+        }
+
+        DOM.hide('gallery-empty');
+
+        const html = images.map((img, i) => `
+          <div class="image-card" data-id="${img.id}" style="animation:scaleIn 0.3s ease ${(i%6)*0.05}s both"
+            onclick="openLightbox(${JSON.stringify(img).replace(/"/g,'&quot;')})">
+            <img src="${img.image_url}" alt="AI Generated" loading="lazy"
+              onerror="this.parentElement.style.background='var(--bg-tertiary)';this.style.display='none'">
+            <div class="image-card-overlay">
+              <div class="text-small" style="color:rgba(255,255,255,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:0.75rem">
+                ${img.prompt?.substring(0, 50) || 'Generated image'}...
+              </div>
+            </div>
+            <div class="image-card-actions">
+              <button class="image-action-btn ${img.is_favorite ? 'active' : ''}" onclick="event.stopPropagation();toggleFavorite('${img.id}',this)" title="Favorite">
+                <i class="fas fa-heart" ${img.is_favorite ? 'style="color:#e055a9"' : ''}></i>
+              </button>
+              <button class="image-action-btn" onclick="event.stopPropagation();downloadImage('${img.image_url}','${img.id}')" title="Download">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="image-action-btn" onclick="event.stopPropagation();editImage('${img.image_url}','${img.id}')" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="image-action-btn" onclick="event.stopPropagation();deleteImage('${img.id}')" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        if (page === 1) {
+          grid.innerHTML = html;
+        } else {
+          grid.insertAdjacentHTML('beforeend', html);
+        }
+
+        if (currentPage < totalPages) DOM.show('load-more-btn');
+        else DOM.hide('load-more-btn');
+
+      } catch (err) {
+        grid.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:40px">Failed to load gallery</p>';
+      }
+    }
+
+    function loadMore() { loadGallery(currentPage + 1); }
+
+    function debounceSearch() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => loadGallery(1), 500);
+    }
+
+    function filterFavorites(fav, el) {
+      showFavorites = fav;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      loadGallery(1);
+    }
+
+    function setGridView(mode, btn) {
+      document.querySelectorAll('.grid-toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const grid = document.getElementById('gallery-grid');
+      grid.className = `image-grid ${mode === 'list' ? 'list-view' : ''}`;
+    }
+
+    function openLightbox(img) {
+      currentImage = img;
+      document.getElementById('lightbox-img').src = img.image_url;
+      document.getElementById('lightbox-prompt').textContent = img.enhanced_prompt || img.prompt || 'No prompt';
+      document.getElementById('lightbox-meta-info').innerHTML = `
+        <div class="flex gap-sm"><span class="badge badge-primary">${img.style || 'AI Art'}</span><span class="badge badge-primary">${img.aspect_ratio || '1:1'}</span></div>
+        <div>📅 ${Format.date(img.created_at)}</div>
+        <div>📐 ${img.width}×${img.height}px</div>
+        <div>🔑 Seed: ${img.seed || 'Random'}</div>
+      `;
+      const favBtn = document.getElementById('lightbox-favorite-btn');
+      if (img.is_favorite) { favBtn.innerHTML = '<i class="fas fa-heart" style="color:#e055a9"></i> Unfavorite'; }
+      else { favBtn.innerHTML = '<i class="fas fa-heart"></i> Favorite'; }
+      document.getElementById('lightbox').classList.add('active');
+    }
+
+    function closeLightbox(e) {
+      if (!e || e.target === document.getElementById('lightbox')) {
+        document.getElementById('lightbox').classList.remove('active');
+      }
+    }
+
+    function downloadImage(url, id) {
+      const a = document.createElement('a'); a.href = url; a.download = `arua-${id}.jpg`; a.target = '_blank'; a.click();
+      Toast.success('Download started!');
+    }
+
+    function downloadCurrentImage() { if (currentImage) downloadImage(currentImage.image_url, currentImage.id); }
+
+    function editImage(url, id) { window.location.href = `editor.html?image=${encodeURIComponent(url)}&id=${id}`; }
+    function editCurrentImage() { if (currentImage) editImage(currentImage.image_url, currentImage.id); }
+
+    async function toggleFavorite(id, btn) {
+      try {
+        const r = await API.post('/favorite', { image_id: id });
+        const icon = btn.querySelector('i');
+        if (r?.is_favorite) { btn.classList.add('active'); icon.style.color = '#e055a9'; Toast.success('Added to favorites!'); }
+        else { btn.classList.remove('active'); icon.style.color = ''; }
+      } catch { Toast.error('Failed to update'); }
+    }
+
+    async function toggleLightboxFavorite() {
+      if (!currentImage) return;
+      await toggleFavorite(currentImage.id, document.getElementById('lightbox-favorite-btn'));
+    }
+
+    async function deleteImage(id) {
+      if (!confirm('Delete this image? This cannot be undone.')) return;
+      try {
+        await API.delete(`/image/${id}`);
+        Toast.success('Image deleted');
+        document.querySelector(`[data-id="${id}"]`)?.remove();
+        document.getElementById('lightbox').classList.remove('active');
+      } catch { Toast.error('Failed to delete'); }
+    }
+
+    async function deleteCurrentImage() { if (currentImage) await deleteImage(currentImage.id); }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initSidebarUser();
+      setActiveNav();
+      initMobileSidebar();
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('filter') === 'favorites') showFavorites = true;
+      loadGallery(1);
+    });
+  </script>
+</body>
+</html>

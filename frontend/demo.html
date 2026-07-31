@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARUA AI Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Space Grotesk',sans-serif; background:#0a0a0f; color:#f1f5f9; overflow:hidden; height:100vh; }
+.slide { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; opacity:0; transform:scale(0.95); transition:all 0.8s cubic-bezier(0.4,0,0.2,1); pointer-events:none; }
+.slide.active { opacity:1; transform:scale(1); pointer-events:auto; }
+.progress { position:fixed; top:0; left:0; height:3px; background:linear-gradient(90deg,#dc2626,#ef4444); z-index:100; transition:width 0.3s; }
+.slide-counter { position:fixed; bottom:30px; left:50%; transform:translateX(-50%); font-size:0.8rem; color:#6b7280; z-index:100; letter-spacing:2px; }
+.logo { display:flex; align-items:center; gap:12px; position:fixed; top:24px; left:30px; z-index:100; }
+.logo img { width:36px; height:36px; }
+.logo span { font-size:1.2rem; font-weight:700; }
+.logo span span { color:#ef4444; }
+h1 { font-size:3rem; font-weight:800; text-align:center; margin-bottom:12px; background:linear-gradient(135deg,#f1f5f9 30%,#ef4444); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+h2 { font-size:1.8rem; font-weight:700; text-align:center; margin-bottom:20px; }
+p { font-size:1.1rem; color:#9ca3af; text-align:center; max-width:600px; line-height:1.7; margin-bottom:24px; }
+.features { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:800px; }
+.feature-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:24px; text-align:center; transition:all 0.3s; }
+.feature-card .icon { font-size:2rem; margin-bottom:10px; }
+.feature-card .name { font-weight:600; font-size:0.9rem; color:#f1f5f9; }
+.feature-card .desc { font-size:0.75rem; color:#6b7280; margin-top:4px; }
+.steps { display:flex; gap:20px; max-width:800px; }
+.step { flex:1; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:16px; padding:24px; text-align:center; }
+.step .num { width:32px; height:32px; border-radius:50%; background:#dc2626; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; margin:0 auto 12px; }
+.step h3 { font-size:1rem; margin-bottom:6px; }
+.step p { font-size:0.8rem; margin:0; }
+.cta { display:flex; gap:12px; }
+.btn { padding:14px 32px; border-radius:12px; font-weight:600; font-size:1rem; cursor:pointer; text-decoration:none; transition:all 0.3s; }
+.btn-primary { background:#dc2626; color:white; border:none; }
+.btn-primary:hover { background:#b91c1c; transform:translateY(-2px); }
+.btn-glass { background:rgba(255,255,255,0.06); color:#f1f5f9; border:1px solid rgba(255,255,255,0.1); }
+.btn-glass:hover { background:rgba(255,255,255,0.1); }
+.stats { display:flex; gap:40px; }
+.stat { text-align:center; }
+.stat .num { font-size:2.5rem; font-weight:800; color:#ef4444; }
+.stat .label { font-size:0.85rem; color:#6b7280; }
+@media(max-width:768px) { h1{font-size:2rem} .features{grid-template-columns:1fr} .steps{flex-direction:column} .stats{gap:20px} }
+</style>
+</head>
+<body>
+<div class="progress" id="progress" style="width:0%"></div>
+<div class="logo">
+  <img src="assets/logo-icon.svg" alt="ARUA">
+  <span>ARUA <span>AI</span></span>
+</div>
+<div class="slide-counter" id="counter">01 / 06</div>
+<a href="dashboard.html" style="position:fixed;top:24px;right:30px;z-index:100;font-size:0.85rem;color:#6b7280;text-decoration:none;transition:color 0.3s" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color='#6b7280'"><i class="fas fa-arrow-right"></i> Skip</a>
+
+<!-- Slide 1: Intro -->
+<div class="slide active" data-index="0">
+  <h1>Welcome to ARUA AI</h1>
+  <p style="font-size:1.3rem;color:#d1d5db">The all-in-one AI creative platform<br>Generate, edit, and organize — all from one prompt.</p>
+  <div style="margin-top:30px;display:flex;gap:30px;align-items:center">
+    <i class="fas fa-wand-magic-sparkles" style="font-size:3.5rem;color:#ef4444;opacity:0.8"></i>
+    <i class="fas fa-robot" style="font-size:3rem;color:#5b8def;opacity:0.6"></i>
+    <i class="fas fa-layer-group" style="font-size:3rem;color:#e055a9;opacity:0.6"></i>
+    <i class="fas fa-images" style="font-size:3rem;color:#00d084;opacity:0.6"></i>
+  </div>
+</div>
+
+<!-- Slide 2: Features -->
+<div class="slide" data-index="1">
+  <h2>What You Can Do</h2>
+  <div class="features">
+    <div class="feature-card"><div class="icon">🎨</div><div class="name">AI Workspace</div><div class="desc">Generate images from text prompts with multiple styles</div></div>
+    <div class="feature-card"><div class="icon">🤖</div><div class="name">Multi-Agent Studio</div><div class="desc">5 AI specialists collaborate on your project</div></div>
+    <div class="feature-card"><div class="icon">📦</div><div class="name">Project Generator</div><div class="desc">One prompt → 5 brand assets instantly</div></div>
+    <div class="feature-card"><div class="icon">✂️</div><div class="name">Image Editor</div><div class="desc">Edit with undo/redo, filters & adjustments</div></div>
+    <div class="feature-card"><div class="icon">📁</div><div class="name">Collections</div><div class="desc">Organize images into folders</div></div>
+    <div class="feature-card"><div class="icon">⭐</div><div class="name">Favorites & Gallery</div><div class="desc">Save, favorite, and browse your creations</div></div>
+  </div>
+</div>
+
+<!-- Slide 3: How it Works -->
+<div class="slide" data-index="2">
+  <h2>How It Works</h2>
+  <div class="steps">
+    <div class="step"><div class="num">1</div><h3>Describe</h3><p>Type what you want to create — "a luxury coffee brand" or "a mobile app UI"</p></div>
+    <div class="step"><div class="num">2</div><h3>Generate</h3><p>AI creates your images in seconds using Pollinations + style presets</p></div>
+    <div class="step"><div class="num">3</div><h3>Organize</h3><p>Save to gallery, add to collections, edit further, or download</p></div>
+  </div>
+</div>
+
+<!-- Slide 4: Stats -->
+<div class="slide" data-index="3">
+  <h2>Platform Features</h2>
+  <div class="stats" style="margin-bottom:30px">
+    <div class="stat"><div class="num">16</div><div class="label">API Endpoints</div></div>
+    <div class="stat"><div class="num">5</div><div class="label">AI Agents</div></div>
+    <div class="stat"><div class="num">5</div><div class="label">Project Types</div></div>
+    <div class="stat"><div class="num">8</div><div class="label">Image Styles</div></div>
+  </div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center">
+    <span style="padding:8px 18px;background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);border-radius:99px;font-size:0.85rem">🎯 Creative Director</span>
+    <span style="padding:8px 18px;background:rgba(91,141,239,0.1);border:1px solid rgba(91,141,239,0.3);border-radius:99px;font-size:0.85rem">📊 Brand Strategist</span>
+    <span style="padding:8px 18px;background:rgba(224,85,169,0.1);border:1px solid rgba(224,85,169,0.3);border-radius:99px;font-size:0.85rem">🎨 Visual Designer</span>
+    <span style="padding:8px 18px;background:rgba(0,208,132,0.1);border:1px solid rgba(0,208,132,0.3);border-radius:99px;font-size:0.85rem">🧠 UX Expert</span>
+    <span style="padding:8px 18px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.3);border-radius:99px;font-size:0.85rem">📈 Marketing Expert</span>
+  </div>
+</div>
+
+<!-- Slide 5: Tech -->
+<div class="slide" data-index="4">
+  <h2>Built With</h2>
+  <div class="features">
+    <div class="feature-card"><div class="icon" style="font-size:1.5rem">⚡</div><div class="name">Flask + Python</div><div class="desc">Backend API with authentication & rate limiting</div></div>
+    <div class="feature-card"><div class="icon" style="font-size:1.5rem">🖼️</div><div class="name">Pollinations AI</div><div class="desc">Free image generation via flux model</div></div>
+    <div class="feature-card"><div class="icon" style="font-size:1.5rem">🗄️</div><div class="name">Supabase</div><div class="desc">PostgreSQL database with auth & storage</div></div>
+    <div class="feature-card"><div class="icon" style="font-size:1.5rem">🎨</div><div class="name">Vanilla JS</div><div class="desc">Clean frontend with dark theme & glass UI</div></div>
+  </div>
+</div>
+
+<!-- Slide 6: CTA -->
+<div class="slide" data-index="5">
+  <h1 style="font-size:2.5rem">Ready to Create?</h1>
+  <p style="max-width:500px">Jump into the workspace and start generating. No credit card, no limits.</p>
+  <div class="cta">
+    <a href="workspace.html" class="btn btn-primary"><i class="fas fa-magic"></i> Go to Workspace</a>
+    <a href="agents-studio.html" class="btn btn-glass"><i class="fas fa-robot"></i> Try AI Agents</a>
+  </div>
+  <div style="margin-top:40px;font-size:0.8rem;color:#6b7280">
+    <i class="fas fa-circle" style="color:#22c55e;font-size:0.5rem;vertical-align:middle"></i> Both servers running — localhost:3000 & localhost:5001
+  </div>
+</div>
+
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+
+function goTo(index) {
+  slides.forEach(s => s.classList.remove('active'));
+  slides[index].classList.add('active');
+  document.getElementById('progress').style.width = ((index + 1) / total * 100) + '%';
+  document.getElementById('counter').textContent = String(index + 1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+  current = index;
+}
+
+function next() { goTo((current + 1) % total); }
+
+// Auto-advance every 5 seconds
+setInterval(next, 5000);
+
+// Click to advance
+document.addEventListener('click', next);
+
+// Keyboard
+document.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'ArrowRight') next(); if (e.key === 'ArrowLeft') goTo((current - 1 + total) % total); });
+
+goTo(0);
+</script>
+</body>
+</html>

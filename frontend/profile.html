@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile – ARUA AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .profile-header {
+      background: linear-gradient(135deg, rgba(124,92,216,0.12), rgba(91,141,239,0.08));
+      border: 1px solid rgba(124,92,216,0.2);
+      border-radius: var(--radius-2xl);
+      padding: 32px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: -60%;
+      right: -5%;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,92,216,0.15) 0%, transparent 70%);
+    }
+    .avatar-large {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+      color: white;
+      position: relative;
+      flex-shrink: 0;
+      overflow: hidden;
+      border: 3px solid rgba(124,92,216,0.4);
+    }
+    .avatar-large img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-upload-btn {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: white;
+      cursor: pointer;
+      border: 2px solid var(--bg-primary);
+      transition: transform 0.2s;
+    }
+    .avatar-upload-btn:hover { transform: scale(1.1); }
+    .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .profile-stat { text-align: center; padding: 16px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); }
+    .profile-stat-value { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 800; }
+    .profile-stat-label { font-size: 0.78rem; color: var(--text-muted); }
+    .credits-display {
+      background: linear-gradient(135deg, rgba(124,92,216,0.15), rgba(91,141,239,0.1));
+      border: 1px solid rgba(124,92,216,0.3);
+      border-radius: var(--radius-xl);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    @media (max-width: 768px) { .profile-grid { grid-template-columns: 1fr; } .profile-header { flex-direction: column; text-align: center; } }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg"></div>
+  <div class="mouse-glow"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon"><i class="fas fa-sparkles"></i></div>
+          <span class="sidebar-logo-text">ARUA<span> AI</span></span>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <a href="dashboard.html" class="nav-item"><i class="fas fa-home nav-icon"></i> Dashboard</a>
+          <a href="workspace.html" class="nav-item"><i class="fas fa-magic nav-icon"></i> AI Workspace</a>
+          <a href="project-generator.html" class="nav-item"><i class="fas fa-layer-group nav-icon"></i> Project Generator</a>
+          <a href="agents-studio.html" class="nav-item"><i class="fas fa-robot nav-icon"></i> AI Agents</a>
+          <a href="gallery.html" class="nav-item"><i class="fas fa-images nav-icon"></i> My Gallery</a>
+          <a href="collections.html" class="nav-item"><i class="fas fa-folder nav-icon"></i> Collections</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">AI Tools</div>
+          <a href="workspace.html?type=3d" class="nav-item"><i class="fas fa-cube nav-icon"></i> 3D Studio</a>
+          <a href="workspace.html?type=anime" class="nav-item"><i class="fas fa-star nav-icon"></i> Anime Studio</a>
+          <a href="workspace.html?type=ui" class="nav-item"><i class="fas fa-desktop nav-icon"></i> UI Designer</a>
+          <a href="editor.html" class="nav-item"><i class="fas fa-edit nav-icon"></i> Image Editor</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Account</div>
+          <a href="profile.html" class="nav-item active"><i class="fas fa-user nav-icon"></i> Profile</a>
+          <a href="admin.html" class="nav-item" id="admin-nav-link" style="display:none"><i class="fas fa-shield-alt nav-icon"></i> Admin Panel</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div style="padding:10px 8px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:0.78rem;color:var(--text-muted)">AI Credits</span>
+            <span style="font-size:0.8rem;font-weight:700;color:var(--accent-primary)" id="sidebar-credits">--</span>
+          </div>
+          <div class="progress-bar"><div class="progress-bar-fill" id="credits-bar" style="width:70%"></div></div>
+        </div>
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebar-user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebar-user-name">Loading...</div>
+            <div class="user-role">Creator</div>
+          </div>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-ghost btn-icon" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+          <div><div class="topbar-title">My Profile</div></div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-icon" data-action="toggle-theme"><i class="fas fa-moon" data-theme-icon></i></button>
+          <button class="btn btn-danger btn-sm" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+      </div>
+
+      <div class="page-content">
+        <div style="max-width:800px;margin:0 auto">
+
+          <!-- Profile Header -->
+          <div class="profile-header" id="profile-header">
+            <div style="position:relative">
+              <div class="avatar-large" id="profile-avatar">U</div>
+              <label class="avatar-upload-btn" for="avatar-input" title="Change Avatar">
+                <i class="fas fa-camera"></i>
+              </label>
+              <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadAvatar(event)">
+            </div>
+            <div style="flex:1;position:relative;z-index:2">
+              <h2 id="profile-username" style="font-size:1.5rem;font-weight:800;margin-bottom:4px">Loading...</h2>
+              <p id="profile-email" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:8px">--</p>
+              <p id="profile-bio" style="color:var(--text-secondary);font-size:0.88rem"></p>
+              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+                <span class="badge badge-primary" id="profile-role-badge">User</span>
+                <span class="badge badge-success" id="profile-joined-badge">Joined --</span>
+              </div>
+            </div>
+            <div class="credits-display" style="flex-shrink:0;min-width:160px">
+              <div>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:2px">AI Credits</div>
+                <div style="font-family:var(--font-heading);font-size:1.8rem;font-weight:800;color:var(--accent-primary)" id="profile-credits">--</div>
+              </div>
+              <i class="fas fa-bolt" style="font-size:1.5rem;color:var(--accent-primary);opacity:0.6"></i>
+            </div>
+          </div>
+
+          <!-- Stats Row -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px" id="profile-stats-row">
+            <div class="profile-stat skeleton" style="height:80px"></div>
+            <div class="profile-stat skeleton" style="height:80px"></div>
+            <div class="profile-stat skeleton" style="height:80px"></div>
+          </div>
+
+          <!-- Edit Profile Form -->
+          <div class="card mb-xl">
+            <div class="section-header" style="margin-bottom:20px">
+              <div>
+                <div class="section-title">Edit Profile</div>
+                <div class="section-subtitle">Update your public information</div>
+              </div>
+            </div>
+
+            <form id="profile-form">
+              <div class="profile-grid">
+                <div class="form-group">
+                  <label class="form-label">Username</label>
+                  <div style="position:relative">
+                    <i class="fas fa-user" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-hint);font-size:0.85rem"></i>
+                    <input type="text" id="edit-username" class="form-input" style="padding-left:40px" placeholder="yourname">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email (read-only)</label>
+                  <div style="position:relative">
+                    <i class="fas fa-envelope" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-hint);font-size:0.85rem"></i>
+                    <input type="email" id="edit-email" class="form-input" style="padding-left:40px;opacity:0.6" disabled>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Bio</label>
+                <textarea id="edit-bio" class="form-input form-textarea" rows="3" placeholder="Tell us about yourself as a creator..."></textarea>
+              </div>
+
+              <button type="submit" id="save-profile-btn" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+              </button>
+            </form>
+          </div>
+
+          <!-- Preferences -->
+          <div class="card mb-xl">
+            <div class="section-header" style="margin-bottom:20px">
+              <div>
+                <div class="section-title">Preferences</div>
+                <div class="section-subtitle">Customize your experience</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg-secondary);border-radius:var(--radius-md)">
+                <div>
+                  <div style="font-weight:600;font-size:0.9rem">Dark / Light Mode</div>
+                  <div style="font-size:0.8rem;color:var(--text-muted)">Current: <span id="current-theme-text">Dark</span></div>
+                </div>
+                <button class="btn btn-glass btn-sm" data-action="toggle-theme" onclick="updateThemeText()">
+                  <i class="fas fa-moon" data-theme-icon></i> Toggle
+                </button>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg-secondary);border-radius:var(--radius-md)">
+                <div>
+                  <div style="font-weight:600;font-size:0.9rem">Prompt Enhancement</div>
+                  <div style="font-size:0.8rem;color:var(--text-muted)">Auto-enhance prompts with AI</div>
+                </div>
+                <input type="checkbox" checked style="accent-color:var(--accent-primary);width:18px;height:18px;cursor:pointer">
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg-secondary);border-radius:var(--radius-md)">
+                <div>
+                  <div style="font-weight:600;font-size:0.9rem">Particle Animations</div>
+                  <div style="font-size:0.8rem;color:var(--text-muted)">Background particle effects</div>
+                </div>
+                <input type="checkbox" id="particles-toggle" checked style="accent-color:var(--accent-primary);width:18px;height:18px;cursor:pointer" onchange="toggleParticles(this.checked)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="card" style="border-color:rgba(239,68,68,0.2);background:rgba(239,68,68,0.03)">
+            <div class="section-title" style="color:#ef4444;margin-bottom:8px">Danger Zone</div>
+            <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:16px">These actions are irreversible. Please proceed with caution.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-danger" onclick="confirmLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+              <button class="btn btn-danger" onclick="confirmDeleteAccount()"><i class="fas fa-trash"></i> Delete Account</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+  <script src="scripts/core.js"></script>
+  <script>
+    if (!Auth.isLoggedIn()) window.location.href = 'login.html';
+
+    async function loadProfile() {
+      try {
+        const data = await API.get('/profile');
+        if (!data?.profile) return;
+        const p = data.profile;
+
+        document.getElementById('profile-username').textContent = p.username || 'Creator';
+        document.getElementById('profile-email').textContent = p.email || '';
+        document.getElementById('profile-bio').textContent = p.bio || 'No bio yet.';
+        document.getElementById('profile-credits').textContent = Format.number(p.ai_credits || 0);
+        document.getElementById('sidebar-credits').textContent = Format.number(p.ai_credits || 0);
+
+        const roleEl = document.getElementById('profile-role-badge');
+        roleEl.textContent = p.role === 'admin' ? '👑 Admin' : '✨ Creator';
+        if (p.role === 'admin') { roleEl.className = 'badge badge-warning'; document.getElementById('admin-nav-link').style.display = 'flex'; }
+
+        if (p.created_at) {
+          document.getElementById('profile-joined-badge').textContent = `Joined ${Format.date(p.created_at)}`;
+        }
+
+        // Avatar
+        const avatarEl = document.getElementById('profile-avatar');
+        if (p.avatar_url) avatarEl.innerHTML = `<img src="${p.avatar_url}" alt="Avatar">`;
+        else avatarEl.textContent = (p.username || 'U')[0].toUpperCase();
+
+        const sidebarAvatar = document.getElementById('sidebar-user-avatar');
+        if (p.avatar_url) sidebarAvatar.innerHTML = `<img src="${p.avatar_url}" alt="Avatar">`;
+        else sidebarAvatar.textContent = (p.username || 'U')[0].toUpperCase();
+
+        document.getElementById('sidebar-user-name').textContent = p.username || 'Creator';
+
+        // Stats row
+        document.getElementById('profile-stats-row').innerHTML = `
+          <div class="profile-stat">
+            <div class="profile-stat-value gradient-text-primary">${Format.number(p.total_generated || 0)}</div>
+            <div class="profile-stat-label">Images Generated</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value gradient-text-primary">${Format.number(p.ai_credits || 0)}</div>
+            <div class="profile-stat-label">Credits Remaining</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value gradient-text-primary">${Format.fileSize(p.storage_used || 0)}</div>
+            <div class="profile-stat-label">Storage Used</div>
+          </div>
+        `;
+
+        // Fill form
+        document.getElementById('edit-username').value = p.username || '';
+        document.getElementById('edit-email').value = p.email || '';
+        document.getElementById('edit-bio').value = p.bio || '';
+
+      } catch (err) {
+        Toast.error('Failed to load profile');
+      }
+    }
+
+    async function uploadAvatar(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      Toast.info('Uploading avatar...', 2000);
+
+      try {
+        const token = Auth.getToken();
+        const response = await axios.post(`${CONFIG.API_BASE}/profile/avatar`, formData, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.data?.avatar_url) {
+          const url = response.data.avatar_url;
+          document.getElementById('profile-avatar').innerHTML = `<img src="${url}" alt="Avatar">`;
+          document.getElementById('sidebar-user-avatar').innerHTML = `<img src="${url}" alt="Avatar">`;
+          Toast.success('Avatar updated!');
+        }
+      } catch (err) {
+        // Local preview fallback
+        const reader = new FileReader();
+        reader.onload = e => {
+          document.getElementById('profile-avatar').innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+        };
+        reader.readAsDataURL(file);
+        Toast.info('Avatar preview updated (will sync on backend)');
+      }
+    }
+
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('edit-username').value.trim();
+      const bio = document.getElementById('edit-bio').value.trim();
+
+      if (!username || username.length < 3) {
+        Form.setError(document.getElementById('edit-username'), 'Min 3 characters');
+        return;
+      }
+
+      const btn = document.getElementById('save-profile-btn');
+      Form.setLoading(btn, true, 'Saving...');
+
+      try {
+        await API.put('/profile', { username, bio });
+
+        // Update stored user
+        const user = Auth.getUser();
+        if (user) {
+          user.username = username;
+          localStorage.setItem(CONFIG.USER_KEY, JSON.stringify(user));
+        }
+
+        document.getElementById('profile-username').textContent = username;
+        document.getElementById('sidebar-user-name').textContent = username;
+        Toast.success('Profile updated!');
+      } catch (err) {
+        Toast.error(err.message || 'Update failed');
+      } finally {
+        Form.setLoading(btn, false);
+        btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+      }
+    });
+
+    function updateThemeText() {
+      setTimeout(() => {
+        const t = Theme.getCurrent();
+        document.getElementById('current-theme-text').textContent = t === 'dark' ? 'Dark' : 'Light';
+      }, 100);
+    }
+
+    function toggleParticles(enabled) {
+      const canvas = document.getElementById('particle-canvas');
+      if (canvas) canvas.style.display = enabled ? 'block' : 'none';
+    }
+
+    function confirmLogout() {
+      if (confirm('Are you sure you want to logout?')) Auth.logout();
+    }
+
+    function confirmDeleteAccount() {
+      if (confirm('⚠️ PERMANENTLY DELETE your account and all images? This cannot be undone!')) {
+        Toast.error('Account deletion requires backend setup. Contact support.', 6000);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initSidebarUser();
+      setActiveNav();
+      initMobileSidebar();
+      loadProfile();
+      updateThemeText();
+    });
+  </script>
+</body>
+</html>

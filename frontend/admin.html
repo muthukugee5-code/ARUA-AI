@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel – ARUA AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .admin-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .data-table th { text-align: left; padding: 10px 14px; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-subtle); }
+    .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+    .data-table tr:hover td { background: var(--bg-card-hover); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .table-wrapper { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); overflow: hidden; }
+    .admin-badge-admin { background: rgba(245,166,35,0.2); color: #f5a623; border: 1px solid rgba(245,166,35,0.3); padding: 3px 10px; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; }
+    .admin-badge-user { background: rgba(124,92,216,0.15); color: #b39dfc; border: 1px solid rgba(124,92,216,0.3); padding: 3px 10px; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 600; }
+    .admin-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--bg-secondary); padding: 4px; border-radius: var(--radius-full); width: fit-content; }
+    .admin-tab { padding: 8px 20px; border-radius: var(--radius-full); font-size: 0.85rem; font-weight: 500; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+    .admin-tab.active { background: var(--bg-glass-strong); color: var(--text-primary); }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg"></div>
+  <div class="mouse-glow"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <img src="assets/logo-icon.svg" alt="ARUA AI" class="sidebar-logo-img">
+          <span class="sidebar-logo-text">ARUA<span> AI</span></span>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <a href="dashboard.html" class="nav-item"><i class="fas fa-home nav-icon"></i> Dashboard</a>
+          <a href="workspace.html" class="nav-item"><i class="fas fa-magic nav-icon"></i> AI Workspace</a>
+          <a href="gallery.html" class="nav-item"><i class="fas fa-images nav-icon"></i> My Gallery</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Admin</div>
+          <a href="dashboard.html" class="nav-item"><i class="fas fa-home nav-icon"></i> Dashboard</a>
+          <a href="workspace.html" class="nav-item"><i class="fas fa-magic nav-icon"></i> AI Workspace</a>
+          <a href="project-generator.html" class="nav-item"><i class="fas fa-layer-group nav-icon"></i> Project Generator</a>
+          <a href="agents-studio.html" class="nav-item"><i class="fas fa-robot nav-icon"></i> AI Agents</a>
+          <a href="gallery.html" class="nav-item"><i class="fas fa-images nav-icon"></i> My Gallery</a>
+          <a href="admin.html" class="nav-item active"><i class="fas fa-shield-alt nav-icon"></i> Admin Panel</a>
+          <a href="profile.html" class="nav-item"><i class="fas fa-user nav-icon"></i> Profile</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebar-user-avatar">A</div>
+          <div class="user-info"><div class="user-name" id="sidebar-user-name">Admin</div><div class="user-role" style="color:var(--accent-gold)">👑 Administrator</div></div>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="Auth.logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-ghost btn-icon" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+          <div>
+            <div class="topbar-title">Admin Panel</div>
+            <div class="topbar-subtitle">Platform management & analytics</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-icon" data-action="toggle-theme"><i class="fas fa-moon" data-theme-icon></i></button>
+          <button class="btn btn-glass btn-sm" onclick="loadAdminData()"><i class="fas fa-refresh"></i> Refresh</button>
+        </div>
+      </div>
+
+      <div class="page-content">
+
+        <!-- Admin Stats -->
+        <div class="admin-stats" id="admin-stats">
+          <div class="stat-card skeleton" style="height:120px"></div>
+          <div class="stat-card skeleton" style="height:120px"></div>
+          <div class="stat-card skeleton" style="height:120px"></div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+          <button class="admin-tab active" onclick="showTab('users', this)">👥 Users</button>
+          <button class="admin-tab" onclick="showTab('images', this)">🖼️ Images</button>
+          <button class="admin-tab" onclick="showTab('analytics', this)">📊 Analytics</button>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="tab-users">
+          <div class="section-header mb-xl">
+            <div>
+              <div class="section-title">All Users</div>
+              <div class="section-subtitle" id="user-count-subtitle">Loading...</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="user-search" class="form-input" placeholder="Search users..." style="width:200px" oninput="filterUsers()">
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Credits</th>
+                  <th>Generated</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted)">Loading users...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Images Tab -->
+        <div id="tab-images" class="hidden">
+          <div class="section-header mb-xl">
+            <div>
+              <div class="section-title">All Generated Images</div>
+              <div class="section-subtitle" id="img-count-subtitle">Loading...</div>
+            </div>
+          </div>
+          <div class="image-grid" id="admin-images-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">Loading images...</div>
+          </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="tab-analytics" class="hidden">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+            <div class="card">
+              <div class="section-title" style="margin-bottom:16px">Platform Overview</div>
+              <div style="display:flex;flex-direction:column;gap:12px;font-size:0.9rem" id="analytics-data">
+                <div style="color:var(--text-muted)">Loading analytics...</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="section-title" style="margin-bottom:16px">Recent Signups</div>
+              <div id="recent-signups" style="display:flex;flex-direction:column;gap:10px">
+                <div style="color:var(--text-muted);font-size:0.88rem">Loading...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="scripts/core.js"></script>
+  <script>
+    if (!Auth.isLoggedIn()) window.location.href = 'login.html';
+
+    let allUsers = [];
+
+    async function loadAdminData() {
+      try {
+        const [statsData, usersData, imagesData] = await Promise.all([
+          API.get('/admin/stats'),
+          API.get('/admin/users'),
+          API.get('/admin/images')
+        ]);
+
+        if (statsData) renderAdminStats(statsData);
+        if (usersData) renderUsers(usersData);
+        if (imagesData) renderAdminImages(imagesData);
+
+      } catch (err) {
+        if (err.message?.includes('403') || err.message?.includes('Forbidden')) {
+          Toast.error('Admin access required');
+          window.location.href = 'dashboard.html';
+        } else {
+          Toast.error('Failed to load admin data: ' + err.message);
+        }
+      }
+    }
+
+    function renderAdminStats(data) {
+      const stats = data.stats || {};
+      document.getElementById('admin-stats').innerHTML = `
+        <div class="stat-card" style="--stat-bg:rgba(124,92,216,0.2);--stat-color:#7c5cd8">
+          <div class="stat-icon">👥</div>
+          <div class="stat-value">${Format.number(stats.total_users || 0)}</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card" style="--stat-bg:rgba(91,141,239,0.2);--stat-color:#5b8def">
+          <div class="stat-icon">🖼️</div>
+          <div class="stat-value">${Format.number(stats.total_images || 0)}</div>
+          <div class="stat-label">Total Images</div>
+        </div>
+        <div class="stat-card" style="--stat-bg:rgba(0,208,132,0.2);--stat-color:#00d084">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-value">${Format.number(stats.active_today || 0)}</div>
+          <div class="stat-label">Active Today</div>
+        </div>
+      `;
+
+      // Analytics tab
+      document.getElementById('analytics-data').innerHTML = `
+        <div class="flex justify-between"><span style="color:var(--text-muted)">Total Users</span><strong>${Format.number(stats.total_users || 0)}</strong></div>
+        <div class="flex justify-between"><span style="color:var(--text-muted)">Total Images</span><strong>${Format.number(stats.total_images || 0)}</strong></div>
+        <div class="flex justify-between"><span style="color:var(--text-muted)">Active Today</span><strong style="color:var(--accent-green)">${Format.number(stats.active_today || 0)}</strong></div>
+        <div class="flex justify-between"><span style="color:var(--text-muted)">Avg per User</span><strong>${stats.total_users ? Math.round(stats.total_images / stats.total_users) : 0}</strong></div>
+      `;
+
+      // Recent signups
+      const recentUsers = data.recent_users || [];
+      document.getElementById('recent-signups').innerHTML = recentUsers.slice(0, 5).map(u => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px;background:var(--bg-secondary);border-radius:10px">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:0.85rem;flex-shrink:0">
+            ${(u.username || 'U')[0].toUpperCase()}
+          </div>
+          <div>
+            <div style="font-size:0.85rem;font-weight:600">${u.username || 'User'}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">${Format.relativeTime(u.created_at)}</div>
+          </div>
+        </div>
+      `).join('') || '<div style="color:var(--text-muted);font-size:0.88rem">No recent signups</div>';
+    }
+
+    function renderUsers(data) {
+      allUsers = data.users || [];
+      document.getElementById('user-count-subtitle').textContent = `${data.total || allUsers.length} registered users`;
+      renderUsersTable(allUsers);
+    }
+
+    function renderUsersTable(users) {
+      const tbody = document.getElementById('users-tbody');
+      if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-muted)">No users found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(u => `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:0.82rem;flex-shrink:0">
+                ${(u.username || '?')[0].toUpperCase()}
+              </div>
+              <span style="font-weight:600">${u.username || '—'}</span>
+            </div>
+          </td>
+          <td style="color:var(--text-muted)">${u.email || '—'}</td>
+          <td><span class="admin-badge-${u.role === 'admin' ? 'admin' : 'user'}">${u.role === 'admin' ? '👑 Admin' : '✨ User'}</span></td>
+          <td><span style="color:var(--accent-primary);font-weight:600">${Format.number(u.ai_credits || 0)}</span></td>
+          <td>${Format.number(u.total_generated || 0)}</td>
+          <td style="color:var(--text-muted)">${u.created_at ? Format.date(u.created_at) : '—'}</td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.user_id}','${u.username}')" title="Delete User">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function filterUsers() {
+      const q = document.getElementById('user-search').value.toLowerCase();
+      if (!q) { renderUsersTable(allUsers); return; }
+      const filtered = allUsers.filter(u =>
+        (u.username || '').toLowerCase().includes(q) ||
+        (u.email || '').toLowerCase().includes(q)
+      );
+      renderUsersTable(filtered);
+    }
+
+    function renderAdminImages(data) {
+      const images = data.images || [];
+      document.getElementById('img-count-subtitle').textContent = `${data.total || images.length} total images`;
+      const grid = document.getElementById('admin-images-grid');
+      if (!images.length) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">No images yet</div>';
+        return;
+      }
+      grid.innerHTML = images.slice(0, 20).map(img => `
+        <div class="image-card" style="aspect-ratio:1">
+          <img src="${img.image_url}" loading="lazy" alt="AI Image"
+            onerror="this.parentElement.style.background='var(--bg-tertiary)';this.style.display='none'">
+          <div class="image-card-overlay">
+            <div style="font-size:0.72rem;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.prompt?.substring(0,50)||'Image'}</div>
+          </div>
+          <div class="image-card-actions">
+            <button class="image-action-btn" onclick="adminDeleteImage('${img.id}')" title="Delete"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function showTab(name, btn) {
+      document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      ['users','images','analytics'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== name);
+      });
+    }
+
+    async function deleteUser(userId, username) {
+      if (!confirm(`Delete user "${username}"? This will remove all their data permanently.`)) return;
+      try {
+        await API.delete(`/admin/users/${userId}`);
+        Toast.success(`User "${username}" deleted`);
+        loadAdminData();
+      } catch (err) {
+        Toast.error('Failed to delete user: ' + err.message);
+      }
+    }
+
+    async function adminDeleteImage(imageId) {
+      if (!confirm('Delete this image permanently?')) return;
+      try {
+        await API.delete(`/image/${imageId}`);
+        Toast.success('Image deleted');
+        document.querySelector(`[data-id="${imageId}"]`)?.remove();
+      } catch {
+        Toast.error('Failed to delete image');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initSidebarUser();
+      setActiveNav();
+      initMobileSidebar();
+      loadAdminData();
+    });
+  </script>
+</body>
+</html>

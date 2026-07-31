@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Generator – ARUA AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .project-types { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .project-type-card {
+      padding: 20px 16px; border-radius: var(--radius-xl); border: 1px solid var(--border-subtle);
+      background: var(--bg-card); cursor: pointer; text-align: center; transition: all 0.2s;
+    }
+    .project-type-card:hover { border-color: var(--border-accent); transform: translateY(-2px); }
+    .project-type-card.active { border-color: var(--accent-primary); background: rgba(220,38,38,0.1); }
+    .project-type-icon { font-size: 2rem; margin-bottom: 8px; }
+    .project-type-name { font-size: 0.85rem; font-weight: 600; }
+    .project-type-count { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .asset-card {
+      border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--border-subtle);
+      background: var(--bg-card); transition: all 0.2s;
+    }
+    .asset-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .asset-card-body { padding: 10px 12px; }
+    .asset-type { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-primary); }
+    .result-placeholder { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: var(--bg-secondary); border-radius: 8px; color: var(--text-muted); font-size: 0.85rem; }
+    .loading-shimmer { background: linear-gradient(90deg, var(--bg-card) 25%, var(--bg-card-hover) 50%, var(--bg-card) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .project-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; padding: 20px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg"></div>
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <img src="assets/logo-icon.svg" alt="ARUA AI" class="sidebar-logo-img">
+          <span class="sidebar-logo-text">ARUA<span> AI</span></span>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Create</div>
+          <a href="dashboard.html" class="nav-item"><i class="fas fa-home nav-icon"></i> Dashboard</a>
+          <a href="workspace.html" class="nav-item"><i class="fas fa-magic nav-icon"></i> AI Workspace</a>
+          <a href="project-generator.html" class="nav-item active"><i class="fas fa-layer-group nav-icon"></i> Project Generator</a>
+          <a href="agents-studio.html" class="nav-item"><i class="fas fa-robot nav-icon"></i> AI Agents</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Media</div>
+          <a href="gallery.html" class="nav-item"><i class="fas fa-images nav-icon"></i> Gallery</a>
+          <a href="collections.html" class="nav-item"><i class="fas fa-folder nav-icon"></i> Collections</a>
+          <a href="editor.html" class="nav-item"><i class="fas fa-edit nav-icon"></i> Image Editor</a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">Account</div>
+          <a href="profile.html" class="nav-item"><i class="fas fa-user nav-icon"></i> Profile</a>
+          <a href="#" class="nav-item" id="admin-link" style="display:none"><i class="fas fa-shield-alt nav-icon"></i> Admin Panel</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div style="padding:10px 8px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:0.78rem;color:var(--text-muted)">AI Credits</span>
+            <span style="font-size:0.8rem;font-weight:700;color:var(--accent-primary)" id="sidebar-credits">--</span>
+          </div>
+          <div class="progress-bar"><div class="progress-bar-fill" id="credits-bar" style="width:0%"></div></div>
+        </div>
+        <div class="sidebar-user" onclick="window.location.href='profile.html'">
+          <div class="user-avatar" id="sidebar-user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebar-user-name">Loading...</div>
+            <div class="user-role">Creator</div>
+          </div>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="event.stopPropagation();Auth.logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+    </aside>
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-ghost btn-icon" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+          <div>
+            <div class="topbar-title">🎨 Project Generator</div>
+            <div class="topbar-subtitle">One prompt → entire creative project</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <span style="padding:6px 14px;background:var(--bg-card);border-radius:var(--radius-full);font-size:0.82rem;color:var(--text-muted)"><i class="fas fa-bolt"></i> <span id="topbar-credits">--</span></span>
+          <button class="btn btn-ghost btn-icon" data-action="toggle-theme"><i class="fas fa-moon" data-theme-icon></i></button>
+        </div>
+      </div>
+      <div class="page-content">
+        <div style="max-width:900px;margin:0 auto">
+          <div class="card" style="padding:24px;margin-bottom:24px">
+            <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+              <div style="flex:1;min-width:200px">
+                <label style="font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;display:block">Project Type</label>
+                <div class="project-types" id="project-types"></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <input id="project-prompt" class="form-input" placeholder="Describe your project... e.g. 'A modern gaming café' or 'A luxury fashion brand'" style="flex:1">
+              <button id="generate-project-btn" class="btn btn-primary"><i class="fas fa-magic"></i> Generate Project</button>
+            </div>
+          </div>
+          <div id="results-area" class="hidden">
+            <div class="project-header">
+              <div style="font-size:1.5rem">🎯</div>
+              <div>
+                <div id="project-title" style="font-size:1.1rem;font-weight:700"></div>
+                <div style="font-size:0.82rem;color:var(--text-muted)" id="project-subtitle"></div>
+              </div>
+            </div>
+            <div class="asset-grid" id="asset-grid"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <div id="toast-container"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+  <script src="scripts/core.js"></script>
+  <script src="scripts/watson.js"></script>
+  <script>
+    if (!Auth.isLoggedIn()) window.location.href = 'login.html';
+    let selectedType = null;
+
+    async function loadProjectTypes() {
+      try {
+        const data = await API.get('/generate/project-types');
+        if (!data?.types) return;
+        const container = document.getElementById('project-types');
+        const entries = Object.entries(data.types);
+        const icons = { cafe: '☕', restaurant: '🍽️', startup: '🚀', fashion: '👗', app: '📱' };
+        container.innerHTML = entries.map(([key, val]) => `
+          <div class="project-type-card" data-type="${key}" onclick="selectType('${key}')">
+            <div class="project-type-icon">${icons[key] || '📁'}</div>
+            <div class="project-type-name">${val.name}</div>
+            <div class="project-type-count">${val.asset_count} assets</div>
+          </div>
+        `).join('');
+      } catch(e) { Toast.error('Failed to load project types'); }
+    }
+
+    function selectType(type) {
+      selectedType = type;
+      document.querySelectorAll('.project-type-card').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.project-type-card[data-type="${type}"]`).classList.add('active');
+    }
+
+    document.getElementById('generate-project-btn').addEventListener('click', async () => {
+      const prompt = document.getElementById('project-prompt').value.trim();
+      if (!prompt) { Toast.warning('Enter a project description'); return; }
+      if (!selectedType) { Toast.warning('Select a project type'); return; }
+
+      const btn = document.getElementById('generate-project-btn');
+      btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Generating...';
+      document.getElementById('results-area').classList.add('hidden');
+
+      try {
+        const result = await API.post('/generate/project', { prompt, type: selectedType });
+        if (result?.assets) {
+          const icons = { logo: '🎯', poster: '📸', ui_mobile: '📱', ui_web: '🖥️', color_palette: '🎨', business_card: '💳', social: '📢' };
+          const labels = { logo: 'Logo', poster: 'Poster', ui_mobile: 'Mobile UI', ui_web: 'Web UI', color_palette: 'Color Palette', business_card: 'Business Card', social: 'Social Media' };
+          document.getElementById('project-title').textContent = result.title;
+          document.getElementById('project-subtitle').textContent = `${result.assets.length} assets generated`;
+          document.getElementById('asset-grid').innerHTML = result.assets.map(a => `
+            <div class="asset-card">
+              <a href="${a.url}" target="_blank">
+                <img src="${a.url}" alt="${a.type}" loading="lazy" onerror="this.parentNode.innerHTML='<div class=result-placeholder><i class=\'fas fa-image\'></i></div>'">
+              </a>
+              <div class="asset-card-body">
+                <div class="asset-type">${icons[a.type] || '📁'} ${labels[a.type] || a.type}</div>
+                <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">${a.width}x${a.height}</div>
+              </div>
+            </div>
+          `).join('');
+          document.getElementById('results-area').classList.remove('hidden');
+          Toast.success(`Project generated with ${result.assets.length} assets!`);
+        }
+      } catch (err) { Toast.error(err.message || 'Generation failed'); }
+      finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-magic"></i> Generate Project'; }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initSidebarUser(); setActiveNav(); initMobileSidebar();
+      loadProjectTypes();
+      API.get('/me').then(d => {
+        if (d?.user) {
+          document.getElementById('sidebar-credits').textContent = Format.number(d.user.ai_credits || 0);
+          document.getElementById('topbar-credits').textContent = Format.number(d.user.ai_credits || 0);
+          document.getElementById('credits-bar').style.width = `${Math.min((d.user.ai_credits||0)/100*100,100)}%`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

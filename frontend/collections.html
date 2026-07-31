@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Collections – ARUA AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .collections-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    .collection-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);
+      overflow: hidden; cursor: pointer; transition: all var(--transition-base);
+    }
+    .collection-card:hover { border-color: var(--border-accent); transform: translateY(-3px); box-shadow: var(--shadow-glow-sm); }
+    .collection-cover { height: 160px; background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; overflow: hidden; }
+    .collection-cover-grid { display: grid; grid-template-columns: 1fr 1fr; height: 100%; }
+    .collection-cover-img { object-fit: cover; width: 100%; height: 100%; }
+    .collection-info { padding: 16px; }
+    .collection-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+    .collection-count { font-size: 0.8rem; color: var(--text-muted); }
+    .new-collection-card {
+      border: 2px dashed var(--border-medium); border-radius: var(--radius-xl); display: flex;
+      flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      min-height: 220px; cursor: pointer; transition: all var(--transition-base); color: var(--text-muted);
+    }
+    .new-collection-card:hover { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(124,92,216,0.05); }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg"></div>
+  <div class="mouse-glow"></div>
+
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon"><i class="fas fa-sparkles"></i></div>
+          <span class="sidebar-logo-text">ARUA<span> AI</span></span>
+        </a>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <a href="dashboard.html" class="nav-item"><i class="fas fa-home nav-icon"></i> Dashboard</a>
+          <a href="workspace.html" class="nav-item"><i class="fas fa-magic nav-icon"></i> AI Workspace</a>
+          <a href="project-generator.html" class="nav-item"><i class="fas fa-layer-group nav-icon"></i> Project Generator</a>
+          <a href="agents-studio.html" class="nav-item"><i class="fas fa-robot nav-icon"></i> AI Agents</a>
+          <a href="gallery.html" class="nav-item"><i class="fas fa-images nav-icon"></i> My Gallery</a>
+          <a href="collections.html" class="nav-item active"><i class="fas fa-folder nav-icon"></i> Collections</a>
+        </div>
+        <div class="nav-section">
+          <a href="workspace.html?type=3d" class="nav-item"><i class="fas fa-cube nav-icon"></i> 3D Studio</a>
+          <a href="workspace.html?type=anime" class="nav-item"><i class="fas fa-star nav-icon"></i> Anime Studio</a>
+          <a href="workspace.html?type=ui" class="nav-item"><i class="fas fa-desktop nav-icon"></i> UI Designer</a>
+          <a href="editor.html" class="nav-item"><i class="fas fa-edit nav-icon"></i> Image Editor</a>
+          <a href="profile.html" class="nav-item"><i class="fas fa-user nav-icon"></i> Profile</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="sidebar-user" onclick="window.location.href='profile.html'">
+          <div class="user-avatar" id="sidebar-user-avatar">U</div>
+          <div class="user-info"><div class="user-name" id="sidebar-user-name">Loading...</div><div class="user-role">Creator</div></div>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="event.stopPropagation();Auth.logout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-ghost btn-icon" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+          <div><div class="topbar-title">Collections</div><div class="topbar-subtitle" id="collection-count">Loading...</div></div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-icon" data-action="toggle-theme"><i class="fas fa-moon" data-theme-icon></i></button>
+          <button class="btn btn-primary btn-sm" onclick="openNewCollectionModal()"><i class="fas fa-plus"></i> New Collection</button>
+        </div>
+      </div>
+
+      <div class="page-content">
+        <div class="collections-grid" id="collections-grid">
+          <div class="skeleton" style="height:220px;border-radius:20px"></div>
+          <div class="skeleton" style="height:220px;border-radius:20px"></div>
+          <div class="skeleton" style="height:220px;border-radius:20px"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- New Collection Modal -->
+  <div class="modal-overlay" id="new-collection-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">New Collection</h2>
+        <button class="modal-close" onclick="closeModal('new-collection-modal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Collection Name</label>
+        <input type="text" id="collection-name" class="form-input" placeholder="e.g., My Logos, UI Designs..." required maxlength="100">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description (optional)</label>
+        <textarea id="collection-desc" class="form-input form-textarea" placeholder="What's this collection for?" rows="3"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="closeModal('new-collection-modal')">Cancel</button>
+        <button class="btn btn-primary" id="create-collection-btn" onclick="createCollection()">
+          <i class="fas fa-plus"></i> Create Collection
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collection Images Modal -->
+  <div class="modal-overlay" id="collection-images-modal">
+    <div class="modal" style="max-width:800px;width:95vw">
+      <div class="modal-header">
+        <h2 class="modal-title" id="collection-modal-title">Collection</h2>
+        <button class="modal-close" onclick="closeModal('collection-images-modal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="image-grid" id="collection-modal-images" style="max-height:60vh;overflow-y:auto;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
+        <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+  <script src="scripts/core.js"></script>
+  <script>
+    if (!Auth.isLoggedIn()) window.location.href = 'login.html';
+
+    const COLLECTION_EMOJIS = ['📁', '🎨', '🖼️', '🌟', '💎', '🎭', '🏗️', '📱', '🎯', '🌈'];
+
+    async function loadCollections() {
+      try {
+        const data = await API.get('/collections');
+        if (!data) return;
+
+        const cols = data.collections || [];
+        document.getElementById('collection-count').textContent = `${cols.length} collection${cols.length !== 1 ? 's' : ''}`;
+
+        const grid = document.getElementById('collections-grid');
+
+        const cardsHtml = cols.map((col, i) => `
+          <div class="collection-card" onclick="openCollection('${col.id}','${col.name}')">
+            <div class="collection-cover">
+              ${COLLECTION_EMOJIS[i % COLLECTION_EMOJIS.length]}
+            </div>
+            <div class="collection-info">
+              <div class="collection-name">${col.name}</div>
+              <div class="collection-count">${col.image_count || 0} images</div>
+              ${col.description ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px">${col.description}</div>` : ''}
+              <div style="display:flex;justify-content:flex-end;margin-top:10px">
+                <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteCollection('${col.id}','${col.name}')">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        grid.innerHTML = cardsHtml + `
+          <div class="new-collection-card" onclick="openNewCollectionModal()">
+            <i class="fas fa-plus" style="font-size:1.5rem"></i>
+            <span style="font-size:0.9rem;font-weight:600">New Collection</span>
+          </div>
+        `;
+      } catch (err) {
+        Toast.error('Failed to load collections');
+      }
+    }
+
+    function openNewCollectionModal() {
+      document.getElementById('collection-name').value = '';
+      document.getElementById('collection-desc').value = '';
+      document.getElementById('new-collection-modal').classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    async function createCollection() {
+      const name = document.getElementById('collection-name').value.trim();
+      const desc = document.getElementById('collection-desc').value.trim();
+
+      if (!name) { Form.setError(document.getElementById('collection-name'), 'Name required'); return; }
+
+      const btn = document.getElementById('create-collection-btn');
+      Form.setLoading(btn, true, 'Creating...');
+
+      try {
+        await API.post('/collections', { name, description: desc });
+        Toast.success(`Collection "${name}" created!`);
+        closeModal('new-collection-modal');
+        loadCollections();
+      } catch (err) {
+        Toast.error(err.message || 'Failed to create');
+      } finally {
+        Form.setLoading(btn, false);
+        btn.innerHTML = '<i class="fas fa-plus"></i> Create Collection';
+      }
+    }
+
+    async function openCollection(id, name) {
+      document.getElementById('collection-modal-title').textContent = name;
+      document.getElementById('collection-images-modal').classList.add('active');
+
+      try {
+        const data = await API.get(`/collections/${id}/images`);
+        const images = data?.images || [];
+        const container = document.getElementById('collection-modal-images');
+
+        if (!images.length) {
+          container.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">
+              <div style="font-size:2.5rem;margin-bottom:8px">📭</div>
+              <p>No images in this collection yet.</p>
+              <a href="gallery.html" class="btn btn-primary btn-sm" style="margin-top:10px">Go to Gallery</a>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = images.map(img => `
+          <div class="image-card" style="aspect-ratio:1">
+            <img src="${img.image_url}" loading="lazy" alt="Image"
+              onerror="this.parentElement.style.background='var(--bg-tertiary)';this.style.display='none'">
+            <div class="image-card-overlay">
+              <div style="font-size:0.72rem;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.prompt?.substring(0,40)||'Image'}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch {
+        Toast.error('Failed to load images');
+      }
+    }
+
+    async function deleteCollection(id, name) {
+      if (!confirm(`Delete collection "${name}"? Images will not be deleted.`)) return;
+      try {
+        await API.delete(`/collections/${id}`);
+        Toast.success('Collection deleted');
+        loadCollections();
+      } catch {
+        Toast.error('Failed to delete');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initSidebarUser();
+      setActiveNav();
+      initMobileSidebar();
+      loadCollections();
+    });
+  </script>
+</body>
+</html>

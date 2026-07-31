@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – ARUA AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .quick-actions { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+    .quick-action-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px;
+      background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl);
+      cursor: pointer; transition: all var(--transition-base); text-align: center; text-decoration: none; color: var(--text-secondary);
+    }
+    .quick-action-btn:hover { border-color: var(--border-accent); transform: translateY(-3px); background: var(--bg-card-hover); color: var(--text-primary); }
+    .chart-container { position: relative; height: 220px; }
+    .activity-list { display: flex; flex-direction: column; gap: 10px; }
+    .activity-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); }
+    .activity-icon { width: 32px; height: 32px; border-radius: 50%; background: rgba(124,92,216,0.15); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; color: var(--accent-primary); flex-shrink: 0; }
+    .welcome-banner {
+      background: linear-gradient(135deg, rgba(124,92,216,0.15) 0%, rgba(91,141,239,0.1) 100%);
+      border: 1px solid rgba(124,92,216,0.25);
+      border-radius: var(--radius-2xl);
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .welcome-banner::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -5%;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,92,216,0.2) 0%, transparent 70%);
+    }
+    .notification-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-primary); position: absolute; top: -2px; right: -2px; }
+    /* Intro Splash */
+    #intro-splash {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: #05050f;
+      animation: splash-fadeout 0.8s ease 4.2s forwards;
+      pointer-events: none;
+    }
+    .splash-content { text-align: center; }
+    .splash-diamond {
+      position: relative;
+      width: 120px; height: 120px; margin: 0 auto 24px;
+      animation: splash-float 2s ease-in-out infinite;
+    }
+    .splash-diamond svg { width: 100%; height: 100%; }
+    .splash-diamond-path {
+      stroke-dasharray: 400;
+      stroke-dashoffset: 400;
+      animation: splash-draw 1.2s ease 0.2s forwards;
+    }
+    .splash-diamond-fill {
+      animation: splash-fill 0.6s ease 1s forwards;
+    }
+    .splash-diamond-inner {
+      animation: splash-fadein 0.5s ease 1.2s forwards;
+    }
+    .splash-glow-ring {
+      position: absolute; inset: -20px; border-radius: 50%;
+      border: 1px solid rgba(220,38,38,0.15);
+      animation: splash-ring 2s ease 0.5s infinite;
+    }
+    .splash-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3.2rem; font-weight: 800; letter-spacing: 0.12em;
+      color: #fff; margin: 0 0 12px;
+    }
+    .splash-title span {
+      display: inline-block;
+      opacity: 0; transform: translateY(20px);
+      animation: splash-letter 0.4s ease forwards;
+    }
+    .splash-title span:nth-child(1) { animation-delay: 1.5s; }
+    .splash-title span:nth-child(2) { animation-delay: 1.6s; }
+    .splash-title span:nth-child(3) { animation-delay: 1.7s; }
+    .splash-title span:nth-child(4) { animation-delay: 1.8s; }
+    .splash-title span:nth-child(5) { animation-delay: 1.9s; }
+    .splash-title span:nth-child(6) { animation-delay: 2.0s; }
+    .splash-tagline {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem; color: rgba(255,255,255,0.5);
+      letter-spacing: 0.2em; text-transform: uppercase;
+      opacity: 0; transform: translateY(10px);
+      animation: splash-letter 0.5s ease 2.3s forwards;
+    }
+    @keyframes splash-draw { to { stroke-dashoffset: 0; } }
+    @keyframes splash-fill { to { opacity: 0.15; } }
+    @keyframes splash-fadein { to { opacity: 1; } }
+    @keyframes splash-fadeout { to { opacity: 0; visibility: hidden; } }
+    @keyframes splash-letter { to { opacity: 1; transform: translateY(0); } }
+    @keyframes splash-ring {
+      0% { transform: scale(0.9); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 0; }
+      100% { transform: scale(0.9); opacity: 0.5; }
+    }
+    @keyframes splash-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Intro Splash -->
+  <div id="intro-splash">
+    <div class="splash-content">
+      <div class="splash-diamond">
+        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="splash-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#dc2626"/>
+              <stop offset="100%" stop-color="#7f1d1d"/>
+            </linearGradient>
+            <filter id="splash-glow">
+              <feGaussianBlur stdDeviation="6" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <path class="splash-diamond-path" d="M60 10 L110 60 L60 110 L10 60 Z" stroke="url(#splash-grad)" stroke-width="2" fill="none" filter="url(#splash-glow)"/>
+          <path class="splash-diamond-fill" d="M60 10 L110 60 L60 110 L10 60 Z" fill="url(#splash-grad)" opacity="0"/>
+          <path class="splash-diamond-inner" d="M60 25 L95 60 L60 95 L25 60 Z" stroke="url(#splash-grad)" stroke-width="1" fill="none" opacity="0"/>
+        </svg>
+        <div class="splash-glow-ring"></div>
+      </div>
+      <h1 class="splash-title"><span>A</span><span>R</span><span>U</span><span>A</span> <span>A</span><span>I</span></h1>
+      <p class="splash-tagline">Generate. Design. Create.</p>
+    </div>
+  </div>
+  <div class="aurora-bg"></div>
+  <div class="mouse-glow"></div>
+
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <img src="assets/logo-icon.svg" alt="ARUA AI" class="sidebar-logo-img">
+          <span class="sidebar-logo-text">ARUA<span> AI</span></span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <a href="dashboard.html" class="nav-item active">
+            <i class="fas fa-home nav-icon"></i> Dashboard
+          </a>
+          <a href="workspace.html" class="nav-item">
+            <i class="fas fa-magic nav-icon"></i> AI Workspace
+            <span class="nav-badge">NEW</span>
+          </a>
+          <a href="project-generator.html" class="nav-item">
+            <i class="fas fa-layer-group nav-icon"></i> Project Generator
+          </a>
+          <a href="agents-studio.html" class="nav-item">
+            <i class="fas fa-robot nav-icon"></i> AI Agents
+          </a>
+          <a href="gallery.html" class="nav-item">
+            <i class="fas fa-images nav-icon"></i> My Gallery
+          </a>
+          <a href="collections.html" class="nav-item">
+            <i class="fas fa-folder nav-icon"></i> Collections
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">AI Tools</div>
+          <a href="workspace.html?type=3d" class="nav-item">
+            <i class="fas fa-cube nav-icon"></i> 3D Studio
+          </a>
+          <a href="workspace.html?type=anime" class="nav-item">
+            <i class="fas fa-star nav-icon"></i> Anime Studio
+          </a>
+          <a href="workspace.html?type=ui" class="nav-item">
+            <i class="fas fa-desktop nav-icon"></i> UI Designer
+          </a>
+          <a href="workspace.html?type=brand" class="nav-item">
+            <i class="fas fa-palette nav-icon"></i> Brand Kit
+          </a>
+          <a href="editor.html" class="nav-item">
+            <i class="fas fa-edit nav-icon"></i> Image Editor
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-section-title">Account</div>
+          <a href="profile.html" class="nav-item">
+            <i class="fas fa-user nav-icon"></i> Profile
+          </a>
+          <a href="#" class="nav-item" id="admin-link" style="display:none">
+            <i class="fas fa-shield-alt nav-icon"></i> Admin Panel
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <!-- Credits -->
+        <div style="padding:10px 8px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:0.78rem;color:var(--text-muted)">AI Credits</span>
+            <span style="font-size:0.8rem;font-weight:700;color:var(--accent-primary)" id="sidebar-credits">--</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" id="credits-bar" style="width:0%"></div>
+          </div>
+        </div>
+        <!-- User -->
+        <div class="sidebar-user" onclick="window.location.href='profile.html'">
+          <div class="user-avatar" id="sidebar-user-avatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebar-user-name">Loading...</div>
+            <div class="user-role">Creator</div>
+          </div>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="event.stopPropagation();Auth.logout()" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="btn btn-ghost btn-icon" id="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div>
+            <div class="topbar-title" id="welcome-title">Good morning! 👋</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-icon" data-action="toggle-theme" data-tooltip="Toggle theme">
+            <i class="fas fa-moon" data-theme-icon></i>
+          </button>
+          <div style="position:relative">
+            <button class="btn btn-ghost btn-icon" id="notif-btn" data-tooltip="Notifications">
+              <i class="fas fa-bell"></i>
+              <div class="notification-dot"></div>
+            </button>
+          </div>
+          <a href="workspace.html" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Generate
+          </a>
+        </div>
+      </div>
+
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner" id="welcome-banner">
+          <div style="position:relative;z-index:2">
+            <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:8px" id="welcome-greeting">Welcome back! ✨</h2>
+            <p style="color:var(--text-secondary);margin:0;font-size:0.95rem">Ready to create something amazing today?</p>
+            <div style="display:flex;gap:10px;margin-top:16px">
+              <a href="workspace.html" class="btn btn-primary btn-sm">
+                <i class="fas fa-magic"></i> Start Generating
+              </a>
+              <a href="gallery.html" class="btn btn-glass btn-sm">
+                <i class="fas fa-images"></i> View Gallery
+              </a>
+            </div>
+          </div>
+          <div style="font-size:4rem;opacity:0.6;position:relative;z-index:2">🎨</div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid mb-xl" id="stats-grid">
+          <div class="stat-card skeleton" style="height:120px"></div>
+          <div class="stat-card skeleton" style="height:120px"></div>
+          <div class="stat-card skeleton" style="height:120px"></div>
+          <div class="stat-card skeleton" style="height:120px"></div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-header mb-xl">
+          <div>
+            <div class="section-title">Quick Actions</div>
+            <div class="section-subtitle">Jump right into your favorite tools</div>
+          </div>
+        </div>
+
+        <div class="quick-actions mb-xl">
+          <a href="workspace.html" class="quick-action-btn">
+            <div style="width:48px;height:48px;background:var(--gradient-primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">🎨</div>
+            <span style="font-size:0.85rem;font-weight:600">Generate Image</span>
+          </a>
+          <a href="workspace.html?type=ui" class="quick-action-btn">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#5b8def,#00c9ff);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">🖥️</div>
+            <span style="font-size:0.85rem;font-weight:600">Design UI</span>
+          </a>
+          <a href="workspace.html?type=anime" class="quick-action-btn">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#e055a9,#7c5cd8);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">🎭</div>
+            <span style="font-size:0.85rem;font-weight:600">Anime Studio</span>
+          </a>
+          <a href="workspace.html?type=3d" class="quick-action-btn">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#00d084,#5b8def);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">🏗️</div>
+            <span style="font-size:0.85rem;font-weight:600">3D Studio</span>
+          </a>
+          <a href="editor.html" class="quick-action-btn">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#f5a623,#ef4444);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">✏️</div>
+            <span style="font-size:0.85rem;font-weight:600">Edit Image</span>
+          </a>
+          <a href="gallery.html?filter=favorites" class="quick-action-btn">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#ef4444,#e055a9);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem">❤️</div>
+            <span style="font-size:0.85rem;font-weight:600">Favorites</span>
+          </a>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px" id="two-col">
+
+          <!-- Weekly Chart -->
+          <div class="card">
+            <div class="section-header">
+              <div>
+                <div class="section-title">Weekly Activity</div>
+                <div class="section-subtitle">Images generated this week</div>
+              </div>
+              <span class="badge badge-primary" id="weekly-total">0 total</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="weekly-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Activity Timeline -->
+          <div class="card">
+            <div class="section-header">
+              <div>
+                <div class="section-title">Recent Activity</div>
+                <div class="section-subtitle">Your latest actions</div>
+              </div>
+            </div>
+            <div class="activity-list" id="activity-list">
+              <div class="skeleton" style="height:48px;border-radius:10px"></div>
+              <div class="skeleton" style="height:48px;border-radius:10px"></div>
+              <div class="skeleton" style="height:48px;border-radius:10px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Images -->
+        <div class="section-header mb-xl">
+          <div>
+            <div class="section-title">Recent Creations</div>
+            <div class="section-subtitle">Your latest generated images</div>
+          </div>
+          <a href="gallery.html" class="btn btn-ghost btn-sm">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="image-grid" id="recent-images">
+          <!-- Skeleton loaders -->
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+          <div class="skeleton" style="aspect-ratio:1;border-radius:16px"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="scripts/core.js"></script>
+  <script>
+    // Auth guard
+    if (!Auth.isLoggedIn()) window.location.href = 'login.html';
+
+    let chart = null;
+
+    async function loadDashboard() {
+      try {
+        const data = await API.get('/dashboard');
+        if (!data) return;
+
+        renderStats(data.stats);
+        renderWeeklyChart(data.weekly_stats || []);
+        renderActivity(data.activity || []);
+        renderRecentImages(data.recent_images || []);
+        updateWelcome(data.profile);
+
+        // Update sidebar credits
+        const creditsEl = document.getElementById('sidebar-credits');
+        const creditsBar = document.getElementById('credits-bar');
+        if (creditsEl) creditsEl.textContent = Format.number(data.stats.ai_credits || 0);
+        if (creditsBar) {
+          const pct = Math.min((data.stats.ai_credits / 100) * 100, 100);
+          creditsBar.style.width = `${pct}%`;
+        }
+
+        // Show admin link if admin
+        const user = Auth.getUser();
+        if (user?.role === 'admin') {
+          document.getElementById('admin-link').style.display = 'flex';
+        }
+
+      } catch (err) {
+        Toast.error('Failed to load dashboard');
+      }
+    }
+
+    function updateWelcome(profile) {
+      const name = profile?.username || Auth.getUser()?.username || 'Creator';
+      const hour = new Date().getHours();
+      const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
+      document.getElementById('welcome-title').textContent = `${greeting}, ${name}! 👋`;
+      document.getElementById('welcome-greeting').textContent = `Welcome back, ${name}! ✨`;
+    }
+
+    function renderStats(stats) {
+      const statsConfig = [
+        { icon: '🖼️', value: Format.number(stats.total_generated || 0), label: 'Total Generated', color: 'rgba(124,92,216,0.2)', textColor: '#7c5cd8', change: `+${stats.today_generated || 0} today`, up: true, link: 'gallery.html' },
+        { icon: '⚡', value: Format.number(stats.ai_credits || 0), label: 'AI Credits Left', color: 'rgba(91,141,239,0.2)', textColor: '#5b8def', change: 'Remaining', up: false, link: 'workspace.html' },
+        { icon: '❤️', value: Format.number(stats.favorites || 0), label: 'Favorites', color: 'rgba(224,85,169,0.2)', textColor: '#e055a9', change: 'Saved items', up: false, link: 'gallery.html?filter=favorites' },
+        { icon: '📁', value: Format.number(stats.collections || 0), label: 'Collections', color: 'rgba(0,208,132,0.2)', textColor: '#00d084', change: 'Folders created', up: false, link: 'collections.html' }
+      ];
+
+      document.getElementById('stats-grid').innerHTML = statsConfig.map((s, i) => `
+        <a href="${s.link}" class="stat-card" style="text-decoration:none;--stat-bg:${s.color};--stat-color:${s.textColor};animation:slideUp 0.4s ease ${i * 0.08}s both;cursor:pointer">
+          <div class="stat-icon">${s.icon}</div>
+          <div class="stat-value">${s.value}</div>
+          <div class="stat-label">${s.label}</div>
+          <div class="stat-change ${s.up ? 'up' : ''}">
+            <i class="fas fa-${s.up ? 'arrow-up' : 'circle'}" style="font-size:0.7rem"></i>
+            ${s.change}
+          </div>
+        </a>
+      `).join('');
+    }
+
+    function renderWeeklyChart(weeklyData) {
+      const ctx = document.getElementById('weekly-chart');
+      if (!ctx || !weeklyData.length) return;
+
+      const total = weeklyData.reduce((sum, d) => sum + d.count, 0);
+      document.getElementById('weekly-total').textContent = `${total} total`;
+
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+      const textColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)';
+
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: weeklyData.map(d => d.date),
+          datasets: [{
+            data: weeklyData.map(d => d.count),
+            backgroundColor: weeklyData.map((_, i) => `rgba(124,92,216,${0.3 + i * 0.1})`),
+            borderColor: 'rgba(124,92,216,0.8)',
+            borderWidth: 1,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              ticks: { color: textColor, stepSize: 1 }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: textColor }
+            }
+          }
+        }
+      });
+    }
+
+    function renderActivity(activity) {
+      const container = document.getElementById('activity-list');
+      if (!activity.length) {
+        container.innerHTML = `
+          <div style="text-align:center;padding:20px;color:var(--text-muted)">
+            <i class="fas fa-history" style="font-size:1.5rem;margin-bottom:8px"></i>
+            <p>No activity yet. Start generating!</p>
+          </div>`;
+        return;
+      }
+
+      const icons = { generate_image: '🎨', favorite: '❤️', delete: '🗑️', login: '🔑', upload: '📤' };
+
+      container.innerHTML = activity.slice(0, 5).map(a => `
+        <div class="activity-item">
+          <div class="activity-icon">${icons[a.action] || '📌'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.details || a.action}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">${Format.relativeTime(a.created_at)}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderRecentImages(images) {
+      const container = document.getElementById('recent-images');
+      if (!images.length) {
+        container.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">
+            <div style="font-size:3rem;margin-bottom:12px">🎨</div>
+            <p>No images yet. <a href="workspace.html" style="color:var(--accent-primary)">Generate your first image!</a></p>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = images.slice(0, 8).map((img, i) => `
+        <div class="image-card" style="animation:scaleIn 0.4s ease ${i * 0.07}s both" onclick="window.location.href='gallery.html'">
+          <img src="${img.image_url}" alt="Generated" loading="lazy"
+            onerror="this.parentElement.style.background='var(--bg-tertiary)';this.style.display='none'"
+          >
+          <div class="image-card-overlay">
+            <span class="badge badge-primary" style="font-size:0.7rem">${img.style || 'AI Art'}</span>
+          </div>
+          <div class="image-card-actions">
+            <button class="image-action-btn" onclick="event.stopPropagation();favoriteImage('${img.id}', this)">
+              <i class="fas fa-heart" style="color:${img.is_favorite ? '#e055a9' : ''}"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function favoriteImage(id, btn) {
+      try {
+        const result = await API.post('/favorite', { image_id: id });
+        if (result?.is_favorite) {
+          btn.querySelector('i').style.color = '#e055a9';
+          Toast.success('Added to favorites!');
+        } else {
+          btn.querySelector('i').style.color = '';
+        }
+      } catch { Toast.error('Failed'); }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      const splash = document.getElementById('intro-splash');
+      if (splash && sessionStorage.getItem('introShown')) {
+        splash.style.display = 'none';
+      } else if (splash) {
+        sessionStorage.setItem('introShown', '1');
+      }
+      initSidebarUser();
+      setActiveNav();
+      initMobileSidebar();
+      loadDashboard();
+    });
+  </script>
+</body>
+</html>

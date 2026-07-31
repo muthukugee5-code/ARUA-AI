@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up – ARUA AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      z-index: 3;
+    }
+    .auth-visual {
+      background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+      border-right: 1px solid var(--border-subtle);
+    }
+    .auth-visual::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124, 92, 216, 0.2) 0%, transparent 60%);
+      top: -200px;
+      left: -200px;
+    }
+    .auth-visual::after {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(91, 141, 239, 0.15) 0%, transparent 60%);
+      bottom: -100px;
+      right: -100px;
+    }
+    .auth-visual-content { position: relative; z-index: 2; text-align: center; }
+    .auth-visual h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; }
+    .auth-visual p { color: var(--text-secondary); font-size: 1.1rem; max-width: 380px; line-height: 1.6; }
+    .auth-features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 32px;
+      text-align: left;
+      width: 100%;
+      max-width: 360px;
+    }
+    .auth-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+    }
+    .auth-feature-icon { font-size: 1.3rem; }
+    .auth-feature-text { font-size: 0.88rem; color: var(--text-secondary); font-weight: 500; }
+    .auth-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      background: var(--bg-primary);
+    }
+    .auth-form-container { width: 100%; max-width: 420px; }
+    .auth-header { margin-bottom: 32px; }
+    .auth-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+    .auth-title { font-family: var(--font-heading); font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
+    .auth-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+    .strength-bar { height: 4px; border-radius: 2px; background: var(--bg-tertiary); overflow: hidden; margin-top: 6px; }
+    .strength-fill { height: 100%; border-radius: 2px; transition: all 0.3s ease; width: 0; }
+    .strength-text { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+    .divider-text { font-size: 0.8rem; color: var(--text-muted); }
+    @media (max-width: 768px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-visual { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora-bg"></div>
+  <div class="mouse-glow"></div>
+
+  <div class="auth-page">
+    <!-- Visual Panel -->
+    <div class="auth-visual">
+      <div class="auth-visual-content">
+        <img src="assets/logo-icon.svg" alt="ARUA AI" style="width:64px;height:64px;margin:0 auto 20px">
+        <h2>Create without <span class="gradient-text">limits</span></h2>
+        <p>Join 500,000+ creators generating stunning AI artwork, UI designs, and more.</p>
+        <div class="auth-features">
+          <div class="auth-feature">
+            <span class="auth-feature-icon">🎨</span>
+            <span class="auth-feature-text">100 free AI credits to start</span>
+          </div>
+          <div class="auth-feature">
+            <span class="auth-feature-icon">🚀</span>
+            <span class="auth-feature-text">30+ specialized AI generators</span>
+          </div>
+          <div class="auth-feature">
+            <span class="auth-feature-icon">✨</span>
+            <span class="auth-feature-text">Smart prompt enhancement AI</span>
+          </div>
+          <div class="auth-feature">
+            <span class="auth-feature-icon">🔒</span>
+            <span class="auth-feature-text">Secure • Private • GDPR compliant</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Panel -->
+    <div class="auth-panel">
+      <div class="auth-form-container">
+        <div class="auth-header">
+          <a href="index.html" class="auth-logo">
+            <img src="assets/logo-icon.svg" alt="ARUA AI" style="width:32px;height:32px">
+            <span style="font-family:var(--font-heading);font-weight:700">ARUA AI</span>
+          </a>
+          <h1 class="auth-title">Create your account</h1>
+          <p class="auth-subtitle">Start generating AI art for free today.</p>
+        </div>
+
+        <form id="signup-form" novalidate>
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <div style="position:relative">
+              <i class="fas fa-user" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-hint);font-size:0.85rem"></i>
+              <input type="text" id="username" class="form-input" style="padding-left:40px" placeholder="yourname" required autocomplete="username">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email address</label>
+            <div style="position:relative">
+              <i class="fas fa-envelope" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-hint);font-size:0.85rem"></i>
+              <input type="email" id="email" class="form-input" style="padding-left:40px" placeholder="you@example.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div style="position:relative">
+              <i class="fas fa-lock" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-hint);font-size:0.85rem"></i>
+              <input type="password" id="password" class="form-input" style="padding-left:40px;padding-right:44px" placeholder="Min. 8 characters" required autocomplete="new-password">
+              <button type="button" class="btn-icon" id="toggle-pass" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text-hint);background:none;border:none;cursor:pointer">
+                <i class="fas fa-eye" id="pass-icon"></i>
+              </button>
+            </div>
+            <div class="strength-bar">
+              <div class="strength-fill" id="strength-fill"></div>
+            </div>
+            <div class="strength-text" id="strength-text"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Confirm password</label>
+            <div style="position:relative">
+              <i class="fas fa-lock" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-hint);font-size:0.85rem"></i>
+              <input type="password" id="confirm-password" class="form-input" style="padding-left:40px" placeholder="Repeat password" required autocomplete="new-password">
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:20px">
+            <input type="checkbox" id="terms" required style="margin-top:3px;accent-color:var(--accent-primary)">
+            <label for="terms" style="font-size:0.85rem;color:var(--text-muted);cursor:pointer">
+              I agree to the <a href="#" style="color:var(--accent-primary)">Terms of Service</a> and <a href="#" style="color:var(--accent-primary)">Privacy Policy</a>
+            </label>
+          </div>
+
+          <button type="submit" id="signup-btn" class="btn btn-primary w-full btn-lg">
+            <i class="fas fa-rocket"></i> Create Free Account
+          </button>
+        </form>
+
+        <div class="divider"><span class="divider-text">Already have an account?</span></div>
+
+        <a href="login.html" class="btn btn-glass w-full" style="justify-content:center">
+          <i class="fas fa-sign-in-alt"></i> Sign In
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
+  <script src="scripts/core.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
+
+    // Password visibility toggle
+    document.getElementById('toggle-pass').addEventListener('click', () => {
+      const input = document.getElementById('password');
+      const icon = document.getElementById('pass-icon');
+      const isText = input.type === 'text';
+      input.type = isText ? 'password' : 'text';
+      icon.className = isText ? 'fas fa-eye' : 'fas fa-eye-slash';
+    });
+
+    // Password strength meter
+    document.getElementById('password').addEventListener('input', (e) => {
+      const val = e.target.value;
+      const fill = document.getElementById('strength-fill');
+      const text = document.getElementById('strength-text');
+      let strength = 0, label = '', color = '';
+
+      if (val.length >= 8) strength++;
+      if (/[A-Z]/.test(val)) strength++;
+      if (/[0-9]/.test(val)) strength++;
+      if (/[^A-Za-z0-9]/.test(val)) strength++;
+
+      const levels = [
+        { label: '', color: '' },
+        { label: 'Weak', color: '#ef4444' },
+        { label: 'Fair', color: '#f5a623' },
+        { label: 'Good', color: '#3b82f6' },
+        { label: 'Strong 🔐', color: '#00d084' }
+      ];
+
+      const level = levels[strength];
+      fill.style.width = `${strength * 25}%`;
+      fill.style.background = level.color;
+      text.textContent = level.label;
+      text.style.color = level.color;
+    });
+
+    // Form submission
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      Form.clearAllErrors(e.target);
+
+      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const termsAccepted = document.getElementById('terms').checked;
+
+      // Validation
+      if (!username) return Form.setError(document.getElementById('username'), 'Username is required');
+      if (username.length < 3) return Form.setError(document.getElementById('username'), 'Minimum 3 characters');
+      if (!email) return Form.setError(document.getElementById('email'), 'Email is required');
+      if (password.length < 8) return Form.setError(document.getElementById('password'), 'Minimum 8 characters');
+      if (password !== confirmPassword) return Form.setError(document.getElementById('confirm-password'), 'Passwords do not match');
+      if (!termsAccepted) { Toast.warning('Please accept the Terms of Service'); return; }
+
+      const btn = document.getElementById('signup-btn');
+      Form.setLoading(btn, true, 'Creating account...');
+
+      try {
+        const result = await API.post('/signup', { username, email, password, confirm_password: confirmPassword });
+
+        if (result && result.success) {
+          Toast.success('Account created! Check your email to confirm.');
+          setTimeout(() => window.location.href = 'login.html', 2500);
+        }
+      } catch (err) {
+        Toast.error(err.message || 'Registration failed. Please try again.');
+      } finally {
+        Form.setLoading(btn, false);
+        btn.innerHTML = '<i class="fas fa-rocket"></i> Create Free Account';
+      }
+    });
+  </script>
+</body>
+</html>
