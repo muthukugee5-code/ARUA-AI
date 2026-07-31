@@ -105,6 +105,7 @@
           <a href="workspace.html?type=3d" class="nav-item"><i class="fas fa-cube nav-icon"></i> 3D Studio</a>
           <a href="workspace.html?type=anime" class="nav-item"><i class="fas fa-star nav-icon"></i> Anime Studio</a>
           <a href="workspace.html?type=ui" class="nav-item"><i class="fas fa-desktop nav-icon"></i> UI Designer</a>
+          <a href="workspace.html?type=video" class="nav-item"><i class="fas fa-film nav-icon"></i> AI Video</a>
           <a href="workspace.html?type=brand" class="nav-item"><i class="fas fa-palette nav-icon"></i> Brand Kit</a>
           <a href="editor.html" class="nav-item"><i class="fas fa-edit nav-icon"></i> Image Editor</a>
         </div>
@@ -163,6 +164,7 @@
           <button class="style-chip" data-type="brand" onclick="setWorkspaceType('brand',this)">🎨 Brand Kit</button>
           <button class="style-chip" data-type="fashion" onclick="setWorkspaceType('fashion',this)">👗 Fashion</button>
           <button class="style-chip" data-type="arch" onclick="setWorkspaceType('arch',this)">🏢 Architecture</button>
+          <button class="style-chip" data-type="video" onclick="setWorkspaceType('video',this)">🎬 AI Video</button>
         </div>
       </div>
 
@@ -271,6 +273,24 @@
             <input type="range" id="num-images" class="form-range" min="1" max="4" value="1">
           </div>
 
+          <!-- Video Controls (shown in Video mode) -->
+          <div id="video-controls" class="hidden">
+            <div class="control-group">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="control-label">Scenes</div>
+                <span id="video-scenes-display" style="font-size:0.85rem;font-weight:700;color:var(--accent-primary)">3</span>
+              </div>
+              <input type="range" id="video-scenes" class="form-range" min="2" max="8" value="3">
+            </div>
+            <div class="control-group">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div class="control-label">Seconds per scene</div>
+                <span id="video-duration-display" style="font-size:0.85rem;font-weight:700;color:var(--accent-primary)">3s</span>
+              </div>
+              <input type="range" id="video-duration" class="form-range" min="2" max="6" value="3" step="1">
+            </div>
+          </div>
+
           <!-- Seed -->
           <div class="control-group">
             <div class="control-label">Seed <span style="color:var(--text-muted);font-weight:400">(-1 = random)</span></div>
@@ -356,9 +376,9 @@
           <!-- Results Section -->
           <div id="results-section">
             <div id="empty-state" class="empty-workspace">
-              <div class="empty-workspace-icon">🎨</div>
-              <h3 style="font-size:1.2rem;font-weight:700;margin:0">Ready to Create</h3>
-              <p style="color:var(--text-muted);font-size:0.9rem;max-width:320px">Enter your prompt above and click Generate. Our AI will create stunning images in seconds.</p>
+              <div class="empty-workspace-icon" id="empty-state-icon">🎨</div>
+              <h3 style="font-size:1.2rem;font-weight:700;margin:0" id="empty-state-title">Ready to Create</h3>
+              <p style="color:var(--text-muted);font-size:0.9rem;max-width:320px" id="empty-state-text">Enter your prompt above and click Generate. Our AI will create stunning images in seconds.</p>
               <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:400px">
                 <span class="badge badge-primary" style="cursor:pointer" onclick="document.getElementById('prompt-input').value='A majestic dragon flying over a futuristic city at sunset, cinematic, 8K'">Try: Dragon City</span>
                 <span class="badge badge-primary" style="cursor:pointer" onclick="document.getElementById('prompt-input').value='Modern iOS mobile app UI for a fitness tracker, clean design, dark mode'">Try: App UI</span>
@@ -377,6 +397,14 @@
             </div>
             <div id="prompt-history"></div>
           </div>
+
+          <!-- Video History -->
+          <div id="video-history-wrap" style="margin-top:32px">
+            <div class="section-header">
+              <div class="section-title" style="font-size:1rem">My Videos</div>
+            </div>
+            <div id="video-history"></div>
+          </div>
         </div>
       </div>
     </main>
@@ -388,6 +416,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="scripts/core.js"></script>
   <script src="scripts/generator.js"></script>
+  <script src="scripts/video.js"></script>
   <script>
     if (!Auth.isLoggedIn()) window.location.href = 'login.html';
 
@@ -404,12 +433,31 @@
       'poster': { category: 'poster', style: 'cinematic', title: 'Poster Designer', subtitle: 'Create stunning posters and banners' },
       'thumbnail': { category: 'thumbnail', style: 'cinematic', title: 'Thumbnail Generator', subtitle: 'Create YouTube and social media thumbnails' },
       'fashion': { category: 'fashion', style: 'hyper_realistic', title: 'Fashion Designer', subtitle: 'Generate fashion concepts and outfits' },
-      'arch': { category: 'architecture', style: 'realistic', title: 'Architecture', subtitle: 'Visualize buildings and spaces' }
+      'arch': { category: 'architecture', style: 'realistic', title: 'Architecture', subtitle: 'Visualize buildings and spaces' },
+      'video': { category: 'general', style: 'cinematic', title: 'AI Video Studio', subtitle: 'Create cinematic AI videos from your prompt' }
     };
+
+    let isVideoMode = false;
 
     function setWorkspaceType(type, el) {
       document.querySelectorAll('[data-type]').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
+
+      isVideoMode = type === 'video';
+
+      // Toggle video-specific controls
+      const videoControls = document.getElementById('video-controls');
+      const numImagesGroup = document.getElementById('num-images')?.closest('.control-group');
+      if (videoControls) videoControls.classList.toggle('hidden', !isVideoMode);
+      if (numImagesGroup) numImagesGroup.style.display = isVideoMode ? 'none' : '';
+
+      // Update generate button
+      const genBtn = document.getElementById('generate-btn');
+      if (genBtn) {
+        genBtn.innerHTML = isVideoMode
+          ? '<i class="fas fa-film"></i> Create Video'
+          : '<i class="fas fa-magic"></i> Generate';
+      }
 
       const config = typeMap[type];
       if (config) {
@@ -421,6 +469,23 @@
         document.querySelectorAll('.style-chip[data-style]').forEach(c => c.classList.remove('active'));
         const styleEl = document.querySelector(`.style-chip[data-style="${config.style}"]`);
         if (styleEl) { styleEl.classList.add('active'); Generator.currentStyle = config.style; }
+      }
+
+      // Show video history in video mode
+      if (isVideoMode) VideoStudio.renderHistory();
+
+      // Update empty state for video mode
+      const emptyIcon = document.getElementById('empty-state-icon');
+      const emptyTitle = document.getElementById('empty-state-title');
+      const emptyText = document.getElementById('empty-state-text');
+      if (isVideoMode) {
+        if (emptyIcon) emptyIcon.textContent = '🎬';
+        if (emptyTitle) emptyTitle.textContent = 'Ready to Create Video';
+        if (emptyText) emptyText.textContent = 'Enter your prompt and click Create Video. We will generate cinematic scenes and render them into a video right in your browser.';
+      } else {
+        if (emptyIcon) emptyIcon.textContent = '🎨';
+        if (emptyTitle) emptyTitle.textContent = 'Ready to Create';
+        if (emptyText) emptyText.textContent = 'Enter your prompt above and click Generate. Our AI will create stunning images in seconds.';
       }
     }
 
@@ -458,6 +523,21 @@
         document.getElementById('empty-state').style.display = 'none';
       }
     };
+
+    // Route generate button to video studio in video mode
+    const origGenerate = Workspace.generate;
+    Workspace.generate = async function() {
+      if (isVideoMode) return VideoStudio.generate();
+      return origGenerate.call(this);
+    };
+
+    // Video control display updates
+    document.getElementById('video-scenes')?.addEventListener('input', (e) => {
+      document.getElementById('video-scenes-display').textContent = e.target.value;
+    });
+    document.getElementById('video-duration')?.addEventListener('input', (e) => {
+      document.getElementById('video-duration-display').textContent = `${e.target.value}s`;
+    });
 
     document.addEventListener('DOMContentLoaded', () => {
       initSidebarUser();

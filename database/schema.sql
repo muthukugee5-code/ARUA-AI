@@ -151,6 +151,30 @@ CREATE INDEX IF NOT EXISTS idx_activity_created  ON public.activity_logs(created
 -- );
 
 -- ============================================================
+-- VIDEOS TABLE
+-- Stores AI video creation records (scene images rendered client-side)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.videos (
+    id               UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id          UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    prompt           TEXT NOT NULL,
+    enhanced_prompt  TEXT,
+    style            TEXT DEFAULT 'cinematic',
+    category         TEXT DEFAULT 'general',
+    model            TEXT DEFAULT 'flux',
+    aspect_ratio     TEXT DEFAULT '16:9',
+    resolution       TEXT DEFAULT 'hd',
+    num_scenes       INTEGER DEFAULT 3,
+    scene_duration   NUMERIC DEFAULT 3,
+    scene_images     JSONB DEFAULT '[]',
+    downloads        INTEGER DEFAULT 0,
+    created_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_videos_user_id    ON public.videos(user_id);
+CREATE INDEX IF NOT EXISTS idx_videos_created_at ON public.videos(created_at DESC);
+
+-- ============================================================
 -- DOWNLOADS TABLE
 -- Track image download events for analytics
 -- ============================================================
@@ -177,6 +201,7 @@ ALTER TABLE public.prompt_history    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.image_versions    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.activity_logs     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.downloads         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.videos            ENABLE ROW LEVEL SECURITY;
 
 -- PROFILES: Users can read/update their own profile
 CREATE POLICY "Users can view own profile"
@@ -253,6 +278,15 @@ CREATE POLICY "Users can view own downloads"
 
 CREATE POLICY "Service role full access downloads"
     ON public.downloads FOR ALL
+    USING (auth.role() = 'service_role');
+
+-- VIDEOS
+CREATE POLICY "Users can manage own videos"
+    ON public.videos FOR ALL
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Service role full access videos"
+    ON public.videos FOR ALL
     USING (auth.role() = 'service_role');
 
 -- ============================================================

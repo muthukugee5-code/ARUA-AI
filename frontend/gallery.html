@@ -63,6 +63,7 @@
           <a href="workspace.html?type=3d" class="nav-item"><i class="fas fa-cube nav-icon"></i> 3D Studio</a>
           <a href="workspace.html?type=anime" class="nav-item"><i class="fas fa-star nav-icon"></i> Anime Studio</a>
           <a href="workspace.html?type=ui" class="nav-item"><i class="fas fa-desktop nav-icon"></i> UI Designer</a>
+          <a href="workspace.html?type=video" class="nav-item"><i class="fas fa-film nav-icon"></i> AI Video</a>
           <a href="editor.html" class="nav-item"><i class="fas fa-edit nav-icon"></i> Image Editor</a>
         </div>
         <div class="nav-section">
@@ -146,6 +147,19 @@
         <button id="load-more-btn" class="btn btn-glass load-more-btn hidden" onclick="loadMore()">
           <i class="fas fa-chevron-down"></i> Load More
         </button>
+
+        <!-- My Videos (local browser renderer) -->
+        <div style="margin-top:40px">
+          <div class="section-header" style="margin-bottom:16px">
+            <div class="section-title"><i class="fas fa-film" style="color:var(--accent-primary)"></i> My Videos</div>
+            <a href="workspace.html?type=video" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Video</a>
+          </div>
+          <div id="videos-grid" class="image-grid"></div>
+          <div id="videos-empty" class="hidden" style="text-align:center;padding:40px 20px;color:var(--text-muted)">
+            <div style="font-size:2.5rem;margin-bottom:12px">🎬</div>
+            <p>No videos yet. Create cinematic AI videos in the workspace!</p>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -342,6 +356,74 @@
 
     async function deleteCurrentImage() { if (currentImage) await deleteImage(currentImage.id); }
 
+    // ---- My Videos (local) ----
+    function loadLocalVideos() {
+      const grid = document.getElementById('videos-grid');
+      const empty = document.getElementById('videos-empty');
+      if (!grid) return;
+
+      let videos = [];
+      try { videos = JSON.parse(localStorage.getItem('arua_videos') || '[]'); } catch { videos = []; }
+
+      if (!videos.length) {
+        grid.innerHTML = '';
+        DOM.show(empty);
+        return;
+      }
+
+      DOM.hide(empty);
+      grid.innerHTML = videos.slice(0, 12).map((v, i) => `
+        <div class="image-card" style="animation:scaleIn 0.3s ease ${(i%6)*0.05}s both;cursor:pointer"
+          onclick="playLocalVideo('${v.id}')">
+          <video src="${v.url}" preload="metadata" muted playsinline style="width:100%;height:100%;object-fit:cover;background:#000"></video>
+          <div class="image-card-overlay">
+            <div class="text-small" style="color:rgba(255,255,255,0.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:0.75rem">
+              🎬 ${v.prompt?.substring(0, 50) || 'AI Video'}...
+            </div>
+          </div>
+          <div class="image-card-actions">
+            <button class="image-action-btn" onclick="event.stopPropagation();downloadLocalVideo('${v.id}')" title="Download">
+              <i class="fas fa-download"></i>
+            </button>
+            <button class="image-action-btn" onclick="event.stopPropagation();deleteLocalVideo('${v.id}')" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function playLocalVideo(id) {
+      let videos = [];
+      try { videos = JSON.parse(localStorage.getItem('arua_videos') || '[]'); } catch { videos = []; }
+      const v = videos.find(x => x.id === id);
+      if (!v) return;
+      const win = window.open('', '_blank');
+      win.document.write(`<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh"><video src="${v.url}" controls autoplay style="max-width:95vw;max-height:95vh"></video></body></html>`);
+    }
+
+    function downloadLocalVideo(id) {
+      let videos = [];
+      try { videos = JSON.parse(localStorage.getItem('arua_videos') || '[]'); } catch { videos = []; }
+      const v = videos.find(x => x.id === id);
+      if (!v?.url) return;
+      const a = document.createElement('a');
+      a.href = v.url;
+      a.download = `arua-ai-${id}.webm`;
+      a.click();
+      Toast.success('Video downloaded!');
+    }
+
+    function deleteLocalVideo(id) {
+      if (!confirm('Delete this video?')) return;
+      let videos = [];
+      try { videos = JSON.parse(localStorage.getItem('arua_videos') || '[]'); } catch { videos = []; }
+      videos = videos.filter(x => x.id !== id);
+      localStorage.setItem('arua_videos', JSON.stringify(videos));
+      Toast.success('Video deleted');
+      loadLocalVideos();
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       initSidebarUser();
       setActiveNav();
@@ -349,6 +431,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('filter') === 'favorites') showFavorites = true;
       loadGallery(1);
+      loadLocalVideos();
     });
   </script>
 </body>

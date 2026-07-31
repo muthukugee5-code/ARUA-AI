@@ -47,6 +47,7 @@ def create_app():
     from api.editor import editor_bp
     from api.projects import projects_bp
     from api.watson import watson_bp
+    from api.video import video_bp
     
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(generate_bp, url_prefix='/api')
@@ -57,6 +58,7 @@ def create_app():
     app.register_blueprint(editor_bp, url_prefix='/api')
     app.register_blueprint(projects_bp, url_prefix='/api')
     app.register_blueprint(watson_bp, url_prefix='/api')
+    app.register_blueprint(video_bp, url_prefix='/api')
     
     # Health check endpoint
     @app.route('/api/health', methods=['GET'])
