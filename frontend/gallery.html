@@ -95,6 +95,12 @@
       </div>
 
       <div class="page-content">
+        <!-- Editor Banner -->
+        <div id="editor-banner" class="hidden" style="width:100%;padding:12px 16px;background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);border-radius:10px;display:flex;align-items:center;gap:10px;font-size:0.85rem;margin-bottom:20px">
+          <i class="fas fa-edit" style="color:#ef4444"></i>
+          <span style="flex:1">Click <strong>Edit</strong> on any image to open it in the editor</span>
+          <a href="editor.html" class="btn btn-ghost btn-sm">Back to Editor <i class="fas fa-arrow-right"></i></a>
+        </div>
         <!-- Filter Bar -->
         <div class="filter-bar">
           <div class="search-wrapper">
@@ -179,10 +185,27 @@
         <div id="lightbox-meta-info" style="display:flex;flex-direction:column;gap:8px;font-size:0.82rem;color:var(--text-muted);margin-bottom:16px"></div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <button class="btn btn-primary w-full" onclick="downloadCurrentImage()"><i class="fas fa-download"></i> Download</button>
+          <button class="btn btn-glass w-full" onclick="lightboxAddToCollection()"><i class="fas fa-folder-plus"></i> Add to Collection</button>
           <button class="btn btn-glass w-full" id="lightbox-favorite-btn" onclick="toggleLightboxFavorite()"><i class="fas fa-heart"></i> Favorite</button>
           <button class="btn btn-glass w-full" onclick="editCurrentImage()"><i class="fas fa-edit"></i> Edit Image</button>
           <button class="btn btn-danger w-full" onclick="deleteCurrentImage()"><i class="fas fa-trash"></i> Delete</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collection Picker -->
+  <div class="modal-overlay" id="collection-picker-modal" onclick="if(event.target===this)closeModal('collection-picker-modal')">
+    <div class="modal" style="max-width:400px">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fas fa-folder-plus"></i> Add to Collection</h2>
+        <button class="modal-close" onclick="closeModal('collection-picker-modal')"><i class="fas fa-times"></i></button>
+      </div>
+      <div style="padding:16px 24px 24px">
+        <div id="collection-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+        <button class="btn btn-glass w-full btn-sm" onclick="closeModal('collection-picker-modal');window.location.href='collections.html'">
+          <i class="fas fa-plus"></i> New Collection
+        </button>
       </div>
     </div>
   </div>
@@ -229,12 +252,12 @@
 
         if (!images.length) {
           grid.innerHTML = '';
-          DOM.show('gallery-empty');
-          DOM.hide('load-more-btn');
+          DOM.show('#gallery-empty');
+          DOM.hide('#load-more-btn');
           return;
         }
 
-        DOM.hide('gallery-empty');
+        DOM.hide('#gallery-empty');
 
         const html = images.map((img, i) => `
           <div class="image-card" data-id="${img.id}" style="animation:scaleIn 0.3s ease ${(i%6)*0.05}s both"
@@ -249,6 +272,9 @@
             <div class="image-card-actions">
               <button class="image-action-btn ${img.is_favorite ? 'active' : ''}" onclick="event.stopPropagation();toggleFavorite('${img.id}',this)" title="Favorite">
                 <i class="fas fa-heart" ${img.is_favorite ? 'style="color:#e055a9"' : ''}></i>
+              </button>
+              <button class="image-action-btn" onclick="event.stopPropagation();showCollectionPicker(event,this.dataset.id)" data-id="${img.id}" title="Add to Collection">
+                <i class="fas fa-folder-plus"></i>
               </button>
               <button class="image-action-btn" onclick="event.stopPropagation();downloadImage('${img.image_url}','${img.id}')" title="Download">
                 <i class="fas fa-download"></i>
@@ -269,8 +295,8 @@
           grid.insertAdjacentHTML('beforeend', html);
         }
 
-        if (currentPage < totalPages) DOM.show('load-more-btn');
-        else DOM.hide('load-more-btn');
+        if (currentPage < totalPages) DOM.show('#load-more-btn');
+        else DOM.hide('#load-more-btn');
 
       } catch (err) {
         grid.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;padding:40px">Failed to load gallery</p>';
@@ -356,6 +382,54 @@
 
     async function deleteCurrentImage() { if (currentImage) await deleteImage(currentImage.id); }
 
+    // ---- Add to Collection ----
+    function lightboxAddToCollection() { if (currentImage) showCollectionPicker(event, currentImage.id); }
+    let pendingImageId = null;
+    let userCollections = [];
+
+    function closeModal(id) {
+      document.getElementById(id)?.classList.remove('active');
+    }
+
+    async function loadUserCollections() {
+      try {
+        const r = await API.get('/collections');
+        userCollections = r?.collections || [];
+      } catch { userCollections = []; }
+      return userCollections;
+    }
+
+    async function showCollectionPicker(event, imageId) {
+      event.stopPropagation();
+      pendingImageId = imageId;
+      const list = document.getElementById('collection-list');
+      const collections = await loadUserCollections();
+      if (!collections.length) {
+        list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)"><p>No collections yet</p><a href="collections.html" class="btn btn-sm btn-primary" style="margin-top:8px;display:inline-flex"><i class="fas fa-plus"></i> Create One</a></div>';
+      } else {
+        list.innerHTML = collections.map(c => `
+          <button class="btn btn-glass w-full" onclick="addToCollection('${c.id}')" style="text-align:left;justify-content:flex-start">
+            <i class="fas fa-folder" style="color:var(--accent-primary)"></i> ${c.name}
+            <span style="margin-left:auto;font-size:0.78rem;color:var(--text-muted)">${c.image_count || 0}</span>
+          </button>
+        `).join('');
+      }
+      document.getElementById('collection-picker-modal').classList.add('active');
+    }
+
+    async function addToCollection(collectionId) {
+      if (!pendingImageId) return;
+      try {
+        const r = await API.post(`/collections/${collectionId}/add`, { image_id: pendingImageId });
+        if (r?.success) {
+          Toast.success('Added to collection!');
+          closeModal('collection-picker-modal');
+        }
+      } catch (err) {
+        Toast.error(err.message || 'Failed to add');
+      }
+    }
+
     // ---- My Videos (local) ----
     function loadLocalVideos() {
       const grid = document.getElementById('videos-grid');
@@ -430,6 +504,7 @@
       initMobileSidebar();
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('filter') === 'favorites') showFavorites = true;
+      if (urlParams.get('source') === 'editor') document.getElementById('editor-banner').classList.remove('hidden');
       loadGallery(1);
       loadLocalVideos();
     });

@@ -130,6 +130,43 @@ def add_to_collection(collection_id):
         return jsonify({'error': 'Failed to add to collection'}), 500
 
 
+@collections_bp.route('/collections/<collection_id>/remove', methods=['POST'])
+@require_auth
+def remove_from_collection(collection_id):
+    """Remove an image from a collection."""
+    user_id = g.user_id
+    data = request.get_json()
+    image_id = data.get('image_id')
+
+    if not image_id:
+        return jsonify({'error': 'Image ID required'}), 400
+
+    try:
+        collections = supabase_query('collections', filters={'id': collection_id, 'user_id': user_id}, use_service_key=True)
+        if not collections:
+            return jsonify({'error': 'Collection not found'}), 404
+
+        supabase_query(
+            f"generated_images?id=eq.{image_id}&user_id=eq.{user_id}",
+            method='PATCH',
+            data={'collection_id': None},
+            use_service_key=True
+        )
+
+        count = max(0, collections[0].get('image_count', 0) - 1)
+        supabase_query(
+            f"collections?id=eq.{collection_id}&user_id=eq.{user_id}",
+            method='PATCH',
+            data={'image_count': count},
+            use_service_key=True
+        )
+
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        logger.error(f"Remove from collection error: {e}")
+        return jsonify({'error': 'Failed to remove image'}), 500
+
+
 @collections_bp.route('/collections/<collection_id>/images', methods=['GET'])
 @require_auth
 def get_collection_images(collection_id):

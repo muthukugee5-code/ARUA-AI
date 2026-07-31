@@ -27,6 +27,13 @@
       min-height: 220px; cursor: pointer; transition: all var(--transition-base); color: var(--text-muted);
     }
     .new-collection-card:hover { border-color: var(--accent-primary); color: var(--accent-primary); background: rgba(124,92,216,0.05); }
+    .image-lightbox { position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.92); display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.3s; }
+    .image-lightbox.active { opacity: 1; visibility: visible; }
+    .lightbox-content { display: flex; gap: 24px; max-width: 1100px; width: 100%; max-height: 90vh; }
+    .lightbox-img-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .lightbox-img-wrap img { max-width: 100%; max-height: 80vh; border-radius: 16px; object-fit: contain; }
+    .lightbox-meta { width: 280px; background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 24px; overflow-y: auto; flex-shrink: 0; }
+    @media (max-width:768px) { .lightbox-content { flex-direction: column; } .lightbox-meta { width: 100%; } }
   </style>
 </head>
 <body>
@@ -122,6 +129,26 @@
       </div>
       <div class="image-grid" id="collection-modal-images" style="max-height:60vh;overflow-y:auto;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))">
         <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="image-lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <div class="lightbox-img-wrap">
+        <img id="lightbox-img" src="" alt="Full size image">
+      </div>
+      <div class="lightbox-meta">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="font-size:1rem;font-weight:700">Image Details</h3>
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="lightbox-prompt" style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;padding:12px;background:var(--bg-card);border-radius:10px"></div>
+        <div id="lightbox-meta-info" style="display:flex;flex-direction:column;gap:8px;font-size:0.82rem;color:var(--text-muted);margin-bottom:16px"></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-primary w-full" onclick="downloadCurrentImage()"><i class="fas fa-download"></i> Download</button>
+          <button class="btn btn-glass w-full" onclick="editCurrentImage()"><i class="fas fa-edit"></i> Edit Image</button>
+        </div>
       </div>
     </div>
   </div>
@@ -226,11 +253,17 @@
         }
 
         container.innerHTML = images.map(img => `
-          <div class="image-card" style="aspect-ratio:1">
+          <div class="image-card" style="aspect-ratio:1;cursor:pointer" data-img-id="${img.id}"
+               onclick='openLightbox(${JSON.stringify(img).replace(/'/g,"&#39;")})'>
             <img src="${img.image_url}" loading="lazy" alt="Image"
               onerror="this.parentElement.style.background='var(--bg-tertiary)';this.style.display='none'">
             <div class="image-card-overlay">
               <div style="font-size:0.72rem;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${img.prompt?.substring(0,40)||'Image'}</div>
+            </div>
+            <div class="image-card-actions" style="bottom:4px;right:4px;gap:4px">
+              <button class="image-action-btn" onclick="event.stopPropagation();removeFromCollection('${id}','${img.id}')" title="Remove from Collection" style="background:rgba(239,68,68,0.8)">
+                <i class="fas fa-times"></i>
+              </button>
             </div>
           </div>
         `).join('');
@@ -248,6 +281,49 @@
       } catch {
         Toast.error('Failed to delete');
       }
+    }
+
+    async function removeFromCollection(collectionId, imageId) {
+      if (!confirm('Remove this image from the collection?')) return;
+      try {
+        await API.post(`/collections/${collectionId}/remove`, { image_id: imageId });
+        Toast.success('Image removed from collection');
+        document.querySelector(`[data-img-id="${imageId}"]`)?.remove();
+      } catch {
+        Toast.error('Failed to remove');
+      }
+    }
+
+    let currentImage = null;
+
+    function openLightbox(img) {
+      currentImage = img;
+      document.getElementById('lightbox-img').src = img.image_url;
+      document.getElementById('lightbox-prompt').textContent = img.enhanced_prompt || img.prompt || 'No prompt';
+      document.getElementById('lightbox-meta-info').innerHTML = `
+        <span><i class="fas fa-calendar"></i> ${new Date(img.created_at).toLocaleDateString()}</span>
+        <span><i class="fas fa-ruler"></i> ${img.width||'—'}×${img.height||'—'}</span>
+      `;
+      document.getElementById('lightbox').classList.add('active');
+    }
+
+    function closeLightbox(e) {
+      if (!e || e.target === document.getElementById('lightbox')) {
+        document.getElementById('lightbox').classList.remove('active');
+      }
+    }
+
+    function downloadCurrentImage() {
+      if (!currentImage) return;
+      const a = document.createElement('a');
+      a.href = currentImage.image_url;
+      a.download = `arua-${currentImage.id||'image'}.png`;
+      a.click();
+    }
+
+    function editCurrentImage() {
+      if (!currentImage) return;
+      window.open(`editor.html?image=${encodeURIComponent(currentImage.image_url)}&prompt=${encodeURIComponent(currentImage.prompt||'')}`, '_blank');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
