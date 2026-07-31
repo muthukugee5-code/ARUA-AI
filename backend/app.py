@@ -1,5 +1,5 @@
 """
-ARUA AI - Main Flask Application
+AURA AI - Main Flask Application
 Production-ready AI Creative Platform Backend
 """
 
@@ -66,7 +66,7 @@ def create_app():
         return jsonify({
             'status': 'healthy',
             'version': '1.0.0',
-            'service': 'ARUA AI Backend'
+            'service': 'AURA AI Backend'
         }), 200
     
     # Global error handlers
@@ -103,5 +103,5 @@ if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     debug = os.getenv('FLASK_ENV', 'production') == 'development'
     
-    logger.info(f"Starting ARUA AI Backend on port {port}")
+    logger.info(f"Starting AURA AI Backend on port {port}")
     app.run(host='0.0.0.0', port=port, debug=debug)

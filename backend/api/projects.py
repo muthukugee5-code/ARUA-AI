@@ -1,5 +1,5 @@
 """
-ARUA AI - Creative Project Generator
+AURA AI - Creative Project Generator
 One prompt generates an entire project: logo, website UI, posters, color palette, and more
 """
 

@@ -1,4 +1,4 @@
-# ARUA AI - Python Backend Dependencies
+# AURA AI - Python Backend Dependencies
 # Install with: pip install -r requirements.txt
 
 # ---- Core Framework ----

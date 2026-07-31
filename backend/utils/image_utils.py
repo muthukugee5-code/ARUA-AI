@@ -1,5 +1,5 @@
 """
-ARUA AI - Image Processing Utilities
+AURA AI - Image Processing Utilities
 Pillow-based image editing, filters, and transformations
 """
 

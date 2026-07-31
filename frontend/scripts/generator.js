@@ -1,5 +1,5 @@
 /**
- * ARUA AI - AI Generation Engine
+ * AURA AI - AI Generation Engine
  * Handles all AI image generation, prompt enhancement, and workspace logic
  */
 

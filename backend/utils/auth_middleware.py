@@ -1,5 +1,5 @@
 """
-ARUA AI - Authentication Middleware
+AURA AI - Authentication Middleware
 JWT token verification and user authentication
 """
 

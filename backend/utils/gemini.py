@@ -1,5 +1,5 @@
 """
-Gemini AI - Google's LLM integration for ARUA AI agents
+Gemini AI - Google's LLM integration for AURA AI agents
 """
 
 import os

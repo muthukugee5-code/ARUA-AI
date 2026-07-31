@@ -1,5 +1,5 @@
 """
-ARUA AI - Supabase Client Utility
+AURA AI - Supabase Client Utility
 Centralized Supabase connection and helper functions
 """
 

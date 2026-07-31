@@ -8,11 +8,11 @@ token = r.json()['access_token']
 headers = {'Authorization': f'Bearer {token}'}
 
 logos = [
-    ("arua-logo-01", "Minimalist tech logo for ARUA AI, diamond shape with red gradient, elegant modern typography 'ARUA', clean vector style, dark background, professional branding", 'minimal', 'logo'),
-    ("arua-logo-02", "Luxury gold and red logo for ARUA AI brand, premium emblem style, letter A monogram, elegant curves, dark background, high-end corporate branding", 'luxury', 'logo'),
-    ("arua-logo-03", "Futuristic AI logo for ARUA, abstract neural network design with red diamond core, glowing tech lines, dark theme, startup tech branding", 'cyberpunk', 'logo'),
-    ("arua-logo-04", "Modern geometric logo for ARUA AI, interconnected nodes forming letter A, red and dark gradients, clean minimal, tech startup branding", 'minimal', 'logo'),
-    ("arua-logo-05", "Elegant minimalist logo mark for ARUA, simple red diamond icon with smooth sans-serif text below, black background, professional brand identity", 'minimal', 'logo'),
+    ("arua-logo-01", "Minimalist tech logo for AURA AI, diamond shape with red gradient, elegant modern typography 'AURA', clean vector style, dark background, professional branding", 'minimal', 'logo'),
+    ("arua-logo-02", "Luxury gold and red logo for AURA AI brand, premium emblem style, letter A monogram, elegant curves, dark background, high-end corporate branding", 'luxury', 'logo'),
+    ("arua-logo-03", "Futuristic AI logo for AURA, abstract neural network design with red diamond core, glowing tech lines, dark theme, startup tech branding", 'cyberpunk', 'logo'),
+    ("arua-logo-04", "Modern geometric logo for AURA AI, interconnected nodes forming letter A, red and dark gradients, clean minimal, tech startup branding", 'minimal', 'logo'),
+    ("arua-logo-05", "Elegant minimalist logo mark for AURA, simple red diamond icon with smooth sans-serif text below, black background, professional brand identity", 'minimal', 'logo'),
 ]
 
 for filename, prompt, style, category in logos:

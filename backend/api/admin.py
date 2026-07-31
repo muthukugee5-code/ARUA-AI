@@ -1,5 +1,5 @@
 """
-ARUA AI - Admin API
+AURA AI - Admin API
 Platform management, user administration, and analytics
 """
 

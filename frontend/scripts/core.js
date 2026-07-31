@@ -1,5 +1,5 @@
 /**
- * ARUA AI - Core JavaScript Utilities
+ * AURA AI - Core JavaScript Utilities
  * Shared functionality across all pages
  */
 
@@ -25,7 +25,7 @@ function resolveApiBase() {
 
 const CONFIG = {
   API_BASE: resolveApiBase(),
-  APP_NAME: 'ARUA AI',
+  APP_NAME: 'AURA AI',
   VERSION: '1.0.0',
   THEME_KEY: 'arua_theme',
   TOKEN_KEY: 'arua_access_token',

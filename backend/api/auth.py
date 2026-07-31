@@ -1,5 +1,5 @@
 """
-ARUA AI - Authentication API
+AURA AI - Authentication API
 User signup, login, logout, and password management
 """
 

@@ -1,5 +1,5 @@
 """
-ARUA AI - WSGI Entry Point
+AURA AI - WSGI Entry Point
 For production deployment with Gunicorn
 Usage: gunicorn wsgi:app
 """

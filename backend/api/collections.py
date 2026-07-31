@@ -1,5 +1,5 @@
 """
-ARUA AI - Collections API
+AURA AI - Collections API
 Organize images into named folders/collections
 """
 

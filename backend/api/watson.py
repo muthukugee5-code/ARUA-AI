@@ -1,5 +1,5 @@
 """
-ARUA AI - IBM Watson API Endpoints
+AURA AI - IBM Watson API Endpoints
 NLP analysis, Assistant chatbot, Visual Recognition
 """
 

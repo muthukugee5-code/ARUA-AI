@@ -1,5 +1,5 @@
 /**
- * ARUA AI - Video Studio
+ * AURA AI - Video Studio
  * Creates AI videos from generated scene images.
  * Renders a Ken Burns slideshow on canvas and records it with MediaRecorder.
  * Works entirely in the browser - no ffmpeg or server-side video needed.

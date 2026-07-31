@@ -1,5 +1,5 @@
 """
-ARUA AI - Full Tools Test
+AURA AI - Full Tools Test
 Generates, edits, upscales, removes background, and saves all results
 """
 

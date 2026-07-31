@@ -1,5 +1,5 @@
 """
-ARUA AI - Image Editor API
+AURA AI - Image Editor API
 Pillow-based image editing, filters, and transformations
 """
 

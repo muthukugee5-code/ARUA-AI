@@ -1,5 +1,5 @@
 """
-ARUA AI - Image Generation API
+AURA AI - Image Generation API
 Pollinations.ai integration with prompt enhancement
 """
 

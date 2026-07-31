@@ -1,5 +1,5 @@
 """
-ARUA AI - IBM Watson Integration
+AURA AI - IBM Watson Integration
 NLP, Assistant, and Visual Recognition services
 """
 
@@ -138,7 +138,7 @@ def _analyze_prompt_live(prompt):
 ASSISTANT_INTENTS = {
     'greeting': {
         'keywords': ['hi', 'hello', 'hey', 'sup', 'help'],
-        'response': 'Welcome to ARUA AI! I\'m your AI creative assistant. Try asking me about generating images, editing, credits, or project types!'
+        'response': 'Welcome to AURA AI! I\'m your AI creative assistant. Try asking me about generating images, editing, credits, or project types!'
     },
     'generate': {
         'keywords': ['generate', 'create', 'make', 'produce', 'image'],
@@ -170,7 +170,7 @@ ASSISTANT_INTENTS = {
     },
     'watson': {
         'keywords': ['watson', 'ibm', 'ai', 'smart', 'enhance'],
-        'response': 'ARUA AI uses **IBM Watson** for smart features! Watson NLP analyzes your prompts for sentiment, style detection, and enhancement suggestions. Watson Visual Recognition can classify and tag your generated images automatically.'
+        'response': 'AURA AI uses **IBM Watson** for smart features! Watson NLP analyzes your prompts for sentiment, style detection, and enhancement suggestions. Watson Visual Recognition can classify and tag your generated images automatically.'
     },
     'demo': {
         'keywords': ['demo', 'tutorial', 'guide', 'walkthrough', 'how'],
@@ -209,7 +209,7 @@ def _chat_mock(message, session_id=None):
     fallback = [
         'I\'m not sure about that! Try asking about **generation**, **editing**, **credits**, **projects**, or **IBM Watson** features.',
         'Hmm, I don\'t have an answer for that yet. I can help with image generation, editing, credits, and platform features!',
-        'Great question! I specialize in ARUA AI topics. Try: "How do I generate an image?" or "What are AI agents?"'
+        'Great question! I specialize in AURA AI topics. Try: "How do I generate an image?" or "What are AI agents?"'
     ]
     return {
         'success': True,

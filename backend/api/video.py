@@ -1,5 +1,5 @@
 """
-ARUA AI - Video Creation API
+AURA AI - Video Creation API
 Generates scene images for AI videos (Ken Burns slideshow rendered client-side)
 """
 

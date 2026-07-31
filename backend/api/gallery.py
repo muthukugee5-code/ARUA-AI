@@ -1,5 +1,5 @@
 """
-ARUA AI - Gallery API
+AURA AI - Gallery API
 Image retrieval, favorites, downloads, and management
 """
 

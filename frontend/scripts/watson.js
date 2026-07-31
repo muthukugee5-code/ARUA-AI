@@ -1,5 +1,5 @@
 /**
- * ARUA AI - IBM Watson Integration
+ * AURA AI - IBM Watson Integration
  * Chatbot widget, prompt analysis, and image classification UI
  */
 
@@ -171,7 +171,7 @@ var Watson = {
         </div>
         <div id="watson-chat-msgs">
           <div class="watson-msg bot">
-            👋 Hi! I'm your AI assistant powered by <strong>IBM Watson</strong>. Ask me about generating images, credits, editing, or any ARUA AI feature!
+            👋 Hi! I'm your AI assistant powered by <strong>IBM Watson</strong>. Ask me about generating images, credits, editing, or any AURA AI feature!
             <div class="brand"><img src="assets/logo-icon.svg" style="width:12px;height:12px"> Watson Assistant</div>
           </div>
         </div>

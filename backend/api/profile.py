@@ -1,5 +1,5 @@
 """
-ARUA AI - Profile API
+AURA AI - Profile API
 User profile management and settings
 """
 

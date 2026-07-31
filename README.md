@@ -1,4 +1,4 @@
-# ARUA AI 🎨
+# AURA AI 🎨
 ### *The World's Most Advanced AI Creative Platform*
 
 > Built for the **IBM AI Innovation Competition** — A production-ready, full-stack AI platform that competes with Midjourney, Leonardo AI, Adobe Firefly, and Canva AI.
@@ -7,7 +7,7 @@
 
 ## ✨ Overview
 
-ARUA AI is a complete AI creative platform where users can generate, edit, organize, and manage AI-created art, UI designs, logos, 3D renders, anime art, and more — all from a single premium dashboard.
+AURA AI is a complete AI creative platform where users can generate, edit, organize, and manage AI-created art, UI designs, logos, 3D renders, anime art, and more — all from a single premium dashboard.
 
 **Live Demo:** `http://localhost:5500/frontend/index.html`  
 **Backend API:** `http://localhost:5000/api`
@@ -249,4 +249,4 @@ MIT License — Built for education and competition purposes.
 
 ---
 
-<p align="center">Made with ❤️ for IBM AI Innovation Competition · ARUA AI © 2024</p>
+<p align="center">Made with ❤️ for IBM AI Innovation Competition · AURA AI © 2024</p>

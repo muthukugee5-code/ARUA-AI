@@ -1,5 +1,5 @@
 """
-ARUA AI - Credit Refill System
+AURA AI - Credit Refill System
 Refills user credits every 24 hours (50 credits per day, max 100)
 """
 
