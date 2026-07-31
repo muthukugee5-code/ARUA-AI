@@ -338,6 +338,9 @@
                   <button id="enhance-btn" class="btn btn-primary btn-sm">
                     <i class="fas fa-wand-magic-sparkles"></i> Enhance
                   </button>
+                  <button class="btn btn-glass btn-sm" onclick="watsonEnhancePrompt(event)" title="IBM Watson Smart Enhance" style="border-color:rgba(220,38,38,0.3)">
+                    <img src="assets/logo-icon.svg" style="width:14px;height:14px;vertical-align:middle"> Watson
+                  </button>
                 </div>
               </div>
             </div>
@@ -415,6 +418,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.0/axios.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="scripts/core.js"></script>
+  <script src="scripts/watson.js"></script>
   <script src="scripts/generator.js"></script>
   <script src="scripts/video.js"></script>
   <script>
@@ -511,6 +515,34 @@
       document.querySelectorAll('.model-btn').forEach(b => b.classList.remove('active'));
       el.classList.add('active');
       Generator.currentModel = model;
+    }
+
+    async function watsonEnhancePrompt(event) {
+      const input = document.getElementById('prompt-input');
+      if (!input || !input.value.trim()) { Toast?.warning?.('Enter a prompt first'); return; }
+      const btn = event?.target?.closest?.('button') || document.querySelector('.btn-watson');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
+      try {
+        const result = await Watson.enhancePrompt(input.value.trim());
+        if (result?.success) {
+          const container = document.getElementById('enhanced-prompt-section') || document.createElement('div');
+          if (!container.id) {
+            container.id = 'enhanced-prompt-section';
+            container.className = 'hidden';
+            document.getElementById('generate-panel')?.appendChild(container);
+          }
+          container.innerHTML = Watson.renderEnhancedPrompt(result);
+          container.classList.remove('hidden');
+          container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          Toast?.success?.('IBM Watson enhanced your prompt!');
+        } else {
+          Toast?.error?.(result?.error || 'Watson enhancement failed');
+        }
+      } catch (err) {
+        Toast?.error?.('Failed to connect to Watson');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<img src="assets/logo-icon.svg" style="width:14px;height:14px;vertical-align:middle"> Watson'; }
+      }
     }
 
     // Override results display to show image grid properly
