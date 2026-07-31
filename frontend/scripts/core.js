@@ -4,8 +4,27 @@
  */
 
 // ---- Configuration ----
+const PROD_API = 'https://arua-ai.onrender.com/api';
+
+function resolveApiBase() {
+  // Allow override via ?api= or localStorage (useful for testing)
+  try {
+    const urlOverride = new URLSearchParams(window.location.search).get('api');
+    if (urlOverride) return urlOverride;
+    const stored = localStorage.getItem('arua_api_base');
+    if (stored) return stored;
+  } catch (e) { /* ignore */ }
+
+  // Local dev: frontend on :5500 or :3000 -> backend on localhost:5000
+  const host = window.location.hostname || '';
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return 'http://localhost:5000/api';
+  }
+  return PROD_API;
+}
+
 const CONFIG = {
-  API_BASE: 'http://localhost:5000/api',
+  API_BASE: resolveApiBase(),
   APP_NAME: 'ARUA AI',
   VERSION: '1.0.0',
   THEME_KEY: 'arua_theme',
